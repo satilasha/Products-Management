@@ -16,6 +16,11 @@ const userSchema = new mongoose.Schema ({
         required: true,
         unique: true
     },
+
+    profileImage:{
+        type: String,
+        requierd: true
+    },
     
     phone:{
         type: String,
@@ -43,5 +48,6 @@ const userSchema = new mongoose.Schema ({
     }
 
 },{timestamps: true})
+
 
 module.exports = mongoose.model('User', userSchema)

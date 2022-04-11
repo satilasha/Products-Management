@@ -1,5 +1,8 @@
 const userModel = require('../model/userModel')
-
+const {uploadFile} = require('./awsController')
+const jwt = require('jsonwebtoken')
+const bcrypt = require('bcrypt')
+const saltRounds = 12
 
 
 /**********************validation*************************************/
@@ -15,9 +18,10 @@ const isValidPassword = function (password) {
     if (password.length > 7 && password.length < 16) return true
 }
 
-// const isValidPincode = function (pincode) {
-//     if (pincode.length > 6 && pincode.length < 6) return true
+// const isValidPincode = function (password) {
+//     if (password.length > 6 && password.length < 6) return true
 // }
+
 
 
 /**********************create user*************************************/
@@ -27,13 +31,13 @@ const isValidPassword = function (password) {
 const createUser = async function (req, res) {
     try {
         const data = req.body
+        let files = req.files;
+        let address = JSON.parse(req.body.address)
+        if (files.length == 0) { return res.status(400).send({ status: false, message: "Please provide a profile image" }) }
 
-        if (Object.keys(data) == 0) {
-            return res.status(400).send({ staus: false, message: "Please provide data" })
-        }
+        const { fname, lname, email, phone, password } = data
 
-        const { fname, lname, email, phone, password, pincode, address } = data
-
+        
         if (!isValid(fname)) {
             return res.status(400).send({ status: false, message: "fname is required" })
         }
@@ -45,10 +49,6 @@ const createUser = async function (req, res) {
         if (!isValid(email)) {
             return res.status(400).send({ status: false, message: "email is required" })
         }
-
-        // if (!isValid(profileImage)) {
-        //     return res.staus(400).send({ status: false, message: "profile image link is required" })
-        // }
 
         if (!isValid(phone)) {
             return res.status(400).send({ status: false, message: "phone number is required" })
@@ -95,24 +95,18 @@ const createUser = async function (req, res) {
         const dupliPhone = await userModel.findOne({ phone })
         if (dupliPhone) { return res.status(400).send({ status: false, message: "Phone number already exists" }) }
 
+
         /*************************************other validation***********************************/
 
-        let Email = email
-        let validateEmail = function (Email) {
-            return /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(Email);
-        }
-        if (!validateEmail(Email)) {
-            return res.status(400).send({ status: false, message: "Please enter a valid email" })
+
+        if (!/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email)) {
+            return res.status(400).send({ status: false, msg: "Please provide valid Email Address" });
         }
 
-        const Phone = phone
-        const validateMobile = function (Phone) {
-            return /^(\+91[\-\s]?)?[0]?(91)?[6789]\d{9}$/.test(Phone)
+        let isValidPhone = (/^(\+91[\-\s]?)?[0]?(91)?[6789]\d{9}$/.test(phone))
+        if (!isValidPhone) {
+            return res.status(400).send({ status: false, msg: "please provide valid phone" })
         }
-        if (!validateMobile(Phone)) {
-            return res.status(400).send({ status: false, message: "Please enter valid mobile" })
-        }
-
 
         // if (!isValidPincode(pincode)) {
         //     return res.status(400).send({ status: false, message: "Please enter valid pincode" })
@@ -122,10 +116,19 @@ const createUser = async function (req, res) {
         if (!isValidPassword(password)) {
             return res.status(400).send({ status: false, message: "Password length must be between 8 to 15 characters" })
         }
-        
 
-        const userData = await userModel.create(data)
-        return res.status(201).send({ status: true, message: "user create successfully", data: userData })
+        const profilePicture = await uploadFile(files[0])
+
+
+        const encyptedPassword = await bcrypt.hash(password, saltRounds)
+
+        const userData = {
+            fname: fname, lname: lname, email: email, password: encyptedPassword, phone: phone, address: address, profileImage:profilePicture 
+        }
+
+
+        const newUser = await userModel.create(userData)
+        return res.status(201).send({ status: true, message: "user create successfully", data: newUser })
 
     } catch (error) {
         console.log(error)
@@ -134,5 +137,68 @@ const createUser = async function (req, res) {
     }
 }
 
-module.exports = { createUser }
+
+const loginUser = async function (req, res) {
+
+    try {
+
+        const data = req.body
+
+        if (Object.keys(data) == 0) {
+            return res.staus(400).send({ status: false, message: "Please enter some data" })
+        }
+
+        let email = req.body.email;
+        let pass = req.body.password;
+
+
+        const user = await userModel.findOne({ email: email })
+        if (!user) return res.status(400).send({ status: false, message: "Email is incorrect" })
+
+        const userId = user._id;
+        const password = user.password;
+
+        const passMatch = await bcrypt.compare(pass, password)
+        if (!passMatch) return res.status(400).send({ status: false, message: "Password is incorrect" })
+
+        const token = jwt.sign({
+
+            userId: user._id.toString(),
+
+        }, "Group26", { expiresIn: "30m" });
+
+        res.setHeader("x-api-key", token);
+        return res.status(200).send({ status: true, message: "You are successfully logged in", userId: userId, token })
+
+
+    } catch (error) {
+        console.log(error)
+
+        return res.status(500).send({ status: false, Error: error.message })
+    }
+}
+
+
+const getProfile = async function (req, res) {
+    try {
+        const userId = req.params.userId
+
+        const getProfileData = await userModel.findOne({ _id: userId })
+
+        if(!getProfileData){
+            return res.status(400).send({status:false, message:"invalid userId"})
+        }
+
+        return res.status(200).send({ staus: true, data: getProfileData })
+
+    } catch (error) {
+
+        return res.status(500).send({ Error: error.message })
+    }
+}
+
+
+module.exports = { createUser, loginUser, getProfile }
+
+
 
