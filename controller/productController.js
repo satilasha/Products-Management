@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 const productModel = require('../model/productModel')
 const validate = require('../validator/validators')
 
@@ -50,7 +49,6 @@ const getProduct = async (req, res) => {
     }
 };
 
-=======
 const { uploadFile } = require('./awsController')
 const productModel = require('../model/productModel')
 
@@ -115,7 +113,7 @@ const createProduct = async function(req, res){
 
 /// get Product by id ------------------------------------
 
-const getProduct = async function (req, res) {
+const getProductbyid = async function (req, res) {
 
     try {
       const productId = req.params.productId
@@ -134,7 +132,7 @@ const getProduct = async function (req, res) {
     }
   }
   
-  module.exports.getProduct = getProduct
+  module.exports.getProductbyid = getProductbyid
   
 
 
@@ -162,4 +160,3 @@ const deleteProductById = async function (req, res){
 
 
 module.exports = {createProduct, deleteProductById}
->>>>>>> 7a440cb66d1d638027229e7d6976d1e721b87119
