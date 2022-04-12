@@ -1,91 +1,6 @@
-<<<<<<< HEAD
-const productModel = require("../model/productModel")
-
-const Productupdate = async function (req, res) {
-    try {
-        let reqBody = req.body
-        let id = req.params.productId
-        if (Object.keys(reqBody).length == 0) {
-            return res.status(400).send({ status: false, msg: "No data found" })
-        }
-
-
-        const { title, description, price, isFreeShipping, style, availableSizes, installments } = reqBody
-
-        const findProduct = await productModel.findOne({ _id: id, isDeleted: false })
-        if (!findProduct) {
-            return res.status(404).send({ status: false, msg: "product id does not exists" })
-        }
-
-        const ProductData = {
-            title: title, description: description, price: price, currencyId: "₹", currencyFormat: "INR",
-            isFreeShipping: isFreeShipping, productImage: uploadedFileURL,
-            style: style, availableSizes: availableSizes, installments: installments
-        }
-        let updateProduct = await productModel.findOneAndUpdate({ _id: id },
-            ProductData, { new: true })
-        res.status(200).send({ status: true, msg: 'Success', data: { updateProduct } })
-
-
-    } catch (err) {
-        res.status(500).send({ status: false, msg: err.message })
-    }
-}
-module.exports.Productupdate = Productupdate
-=======
 const productModel = require('../model/productModel')
 const validate = require('../validator/validators')
-
-const getProduct = async (req, res) => {
-    try {
-        const filterQuery = { isDeleted: false, deletedAt: null };
-        const filter = req.query;
-
-        if (validate.isValidRequestBody(filter)) {
-            const { name, size, priceSort, priceGreaterThan, priceLessThan } = filter;
-
-            if (Object.keys(filter).includes('name')) {
-                filterQuery.name = { $regex: `.*${name.trim()}.*` };
-            }
-            if (Object.keys(filter).includes('priceSort')) {
-                if (priceSort == "ascending") priceSort = 1;
-                if (priceSort == "decending") priceSort = -1;
-                else {
-                    return res.status(400).send({ status: false, message: "Please give ascending or decending price sort" })
-                }
-            }
-
-            if (Object.keys(filter).includes('size')) {
-                //size valid to be completed
-                filterQuery.size = { $all: size }
-            }
-
-            if (Object.keys(filter).includes('priceGreaterThan')) {
-                //num validation
-                filterQuery.price = { $gte: priceGreaterThan };
-            }
-
-            if (Object.keys(filter).includes('priceLessThan')) {
-                filterQuery.price = { $lte: priceLessThan };
-            }
-            if (Object.keys(filter).includes('priceLessThan' && 'priceGreaterThan')) {
-                filterQuery.price = { $gte: priceGreaterThan, $lte: priceLessThan };
-            }
-        }
-
-        const product = await productModel.find(filterQuery).sort({ price: priceSort });
-        if (product.length == 0) {
-            return res.status(400).send({ status: false, msg: "no product found" });
-        }
-
-        res.status(201).send({ status: true, data: product });
-    } catch (error) {
-        res.status(500).send({ status: false, msg: error.message });
-    }
-};
-
 const { uploadFile } = require('./awsController')
-const productModel = require('../model/productModel')
 
 const isValid = function (value) {
     if (typeof value === undefined || typeof value === null) return false
@@ -145,6 +60,54 @@ const createProduct = async function(req, res){
        return res.status(500).send({Error:error.message})
     }
 }
+const getProduct = async (req, res) => {
+    try {
+        const filterQuery = { isDeleted: false, deletedAt: null };
+        const filter = req.query;
+
+        if (validate.isValidRequestBody(filter)) {
+            const { name, size, priceSort, priceGreaterThan, priceLessThan } = filter;
+
+            if (Object.keys(filter).includes('name')) {
+                filterQuery.name = { $regex: `.*${name.trim()}.*` };
+            }
+            if (Object.keys(filter).includes('priceSort')) {
+                if (priceSort == "ascending") priceSort = 1;
+                if (priceSort == "decending") priceSort = -1;
+                else {
+                    return res.status(400).send({ status: false, message: "Please give ascending or decending price sort" })
+                }
+            }
+
+            if (Object.keys(filter).includes('size')) {
+                //size valid to be completed
+                filterQuery.size = { $all: size }
+            }
+
+            if (Object.keys(filter).includes('priceGreaterThan')) {
+                //num validation
+                filterQuery.price = { $gte: priceGreaterThan };
+            }
+
+            if (Object.keys(filter).includes('priceLessThan')) {
+                filterQuery.price = { $lte: priceLessThan };
+            }
+            if (Object.keys(filter).includes('priceLessThan' && 'priceGreaterThan')) {
+                filterQuery.price = { $gte: priceGreaterThan, $lte: priceLessThan };
+            }
+        }
+
+        const product = await productModel.find(filterQuery).sort({ price: priceSort });
+        if (product.length == 0) {
+            return res.status(400).send({ status: false, msg: "no product found" });
+        }
+
+        res.status(201).send({ status: true, data: product });
+    } catch (error) {
+        res.status(500).send({ status: false, msg: error.message });
+    }
+};
+
 
 /// get Product by id ------------------------------------
 
@@ -169,6 +132,39 @@ const getProductbyid = async function (req, res) {
   
   module.exports.getProductbyid = getProductbyid
   
+const productModel = require("../model/productModel")
+
+const Productupdate = async function (req, res) {
+    try {
+        let reqBody = req.body
+        let id = req.params.productId
+        if (Object.keys(reqBody).length == 0) {
+            return res.status(400).send({ status: false, msg: "No data found" })
+        }
+
+
+        const { title, description, price, isFreeShipping, style, availableSizes, installments } = reqBody
+
+        const findProduct = await productModel.findOne({ _id: id, isDeleted: false })
+        if (!findProduct) {
+            return res.status(404).send({ status: false, msg: "product id does not exists" })
+        }
+
+        const ProductData = {
+            title: title, description: description, price: price, currencyId: "₹", currencyFormat: "INR",
+            isFreeShipping: isFreeShipping, productImage: uploadedFileURL,
+            style: style, availableSizes: availableSizes, installments: installments
+        }
+        let updateProduct = await productModel.findOneAndUpdate({ _id: id },
+            ProductData, { new: true })
+        res.status(200).send({ status: true, msg: 'Success', data: { updateProduct } })
+
+
+    } catch (err) {
+        res.status(500).send({ status: false, msg: err.message })
+    }
+}
+module.exports.Productupdate = Productupdate
 
 
 /****************************delete product******************************/
@@ -195,4 +191,3 @@ const deleteProductById = async function (req, res){
 
 
 module.exports = {createProduct, deleteProductById}
->>>>>>> 2c3757a343bd754fb4a4c1adf9d59c7cd4559fd7
