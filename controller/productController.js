@@ -130,7 +130,6 @@ const getProductbyid = async function (req, res) {
     }
   }
   
-  module.exports.getProductbyid = getProductbyid
   
 
 const Productupdate = async function (req, res) {
@@ -163,7 +162,6 @@ const Productupdate = async function (req, res) {
         res.status(500).send({ status: false, msg: err.message })
     }
 }
-module.exports.Productupdate = Productupdate
 
 
 /****************************delete product******************************/
@@ -189,4 +187,4 @@ const deleteProductById = async function (req, res){
 }
 
 
-module.exports = {createProduct, deleteProductById}
+module.exports = {createProduct, getProduct, getProductbyid, Productupdate, deleteProductById}

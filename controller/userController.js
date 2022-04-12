@@ -339,7 +339,7 @@ let updateUser = async function (req, res) {
 
 
 
-module.exports = { createUser, loginUser, getProfile }
+module.exports = { createUser, loginUser, getProfile , updateUser}
 
 
 
