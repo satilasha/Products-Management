@@ -19,12 +19,12 @@ const productSchema = new mongoose.Schema({
 
     currencyId: {
         type: String,
-        required: true
+        default: "INR"
     },
 
     currencyFormate: {
         type: String,
-        required: true
+        default: "₹"
     },
 
     isFreeShipping: {
@@ -33,27 +33,30 @@ const productSchema = new mongoose.Schema({
     },
 
     productImage: {
-        type: String, 
-        required: true
+        type: String,
     },
 
     style: String,
 
     availableSizes: {
         type: String,
-        enum:["S", "XS","M","X", "L","XXL", "XL"]
+        enum: ["S", "XS", "M", "X", "L", "XXL", "XL"],
+        required: true
     },
 
     installments: Number,
 
-    deletedAt:{
-        type: Date
+    deletedAt: {
+        type: Date,
+        default: ""
     },
 
     isDeleted: {
         type: Boolean,
         default: false
     }
-})
+
+}, { timestamps: true })
+
 
 module.exports = mongoose.model('Product', productSchema)

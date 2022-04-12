@@ -5,7 +5,7 @@ const bcrypt = require('bcrypt')
 
 
 
-/**********************validation*************************************/
+/**************************validation*************************************/
 
 
 const isValid = function (value) {
@@ -29,62 +29,64 @@ const createUser = async function (req, res) {
         const data = req.body
         let files = req.files;
         let address = JSON.parse(req.body.address)
-        if (files.length == 0) { return res.status(400).send({ status: false, message: "Please provide a profile image" }) }
+        if (files.length == 0) { return res.status(400).send({ status: false, message: "Please provide user's profile picture " }) }
 
         const { fname, lname, email, phone, password } = data
 
 
         if (!isValid(fname)) {
-            return res.status(400).send({ status: false, message: "fname is required" })
+            return res.status(400).send({ status: false, message: "Please provide user's first name" })
         }
 
         if (!isValid(lname)) {
-            return res.status(400).send({ status: false, message: "lname is required" })
+            return res.status(400).send({ status: false, message: "Please provide user's last name" })
         }
 
         if (!isValid(email)) {
-            return res.status(400).send({ status: false, message: "email is required" })
+            return res.status(400).send({ status: false, message: "Please provide user's emailId" })
         }
 
         if (!isValid(phone)) {
-            return res.status(400).send({ status: false, message: "phone number is required" })
+            return res.status(400).send({ status: false, message: "Please provide user's phone number" })
         }
 
         if (!isValid(password)) {
-            return res.status(400).send({ status: false, message: "password is required" })
+            return res.status(400).send({ status: false, message: "Please provide password" })
         }
 
         if (address) {
             if (address.shipping) {
                 if (!isValid(address.shipping.street)) {
-                    return res.status(400).send({ status: false, message: "street is required" })
+                    return res.status(400).send({ status: false, message: "Please provide street name in shipping address" })
                 }
 
                 if (!isValid(address.shipping.city)) {
-                    return res.status(400).send({ status: false, message: "city is required" })
+                    return res.status(400).send({ status: false, message: "Please provide city name in shipping address" })
                 }
 
                 if (!isValid(address.shipping.pincode)) {
-                    return res.status(400).send({ status: false, message: "pincode is required" })
+                    return res.status(400).send({ status: false, message: "Please provide pincode in shipping address" })
                 }
             }
             if (address.billing) {
                 if (!isValid(address.billing.street)) {
-                    return res.status(400).send({ status: false, message: "street is required" })
+                    return res.status(400).send({ status: false, message: "Please provide street name in billing address" })
                 }
 
                 if (!isValid(address.billing.city)) {
-                    return res.status(400).send({ status: false, message: "city is required" })
+                    return res.status(400).send({ status: false, message: "Please provide city name in billing address" })
                 }
 
                 if (!isValid(address.billing.pincode)) {
-                    return res.status(400).send({ status: false, message: "pincode is required" })
+                    return res.status(400).send({ status: false, message: "Please provide pincode in billing address" })
                 }
             }
         }
 
+
         /*************************************dupticate data***********************************/
 
+          
         const dupliEmail = await userModel.findOne({ email })
         if (dupliEmail) { return res.status(400).send({ status: false, message: "Email already exists" }) }
 
@@ -104,18 +106,17 @@ const createUser = async function (req, res) {
         }
 
 
-
         if (!isValidPassword(password)) {
             return res.status(400).send({ status: false, message: "Password length must be between 8 to 15 characters" })
         }
 
-/*************************upload image***********************************/
+        /*************************upload image***********************************/
 
 
         const profilePicture = await uploadFile(files[0])
 
 
-/*************************hashing password***********************************/
+        /*************************hashing password***********************************/
 
 
         const salt = 10
@@ -178,6 +179,9 @@ const loginUser = async function (req, res) {
 
         const passMatch = await bcrypt.compare(pass, password)
         if (!passMatch) return res.status(400).send({ status: false, message: "Password is incorrect" })
+
+
+/******************************create token***********************************/
 
         const token = jwt.sign({
 
