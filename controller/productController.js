@@ -1,5 +1,5 @@
 const productModel = require('../model/productModel')
-const validate = require('../validator/validators')
+const validate = require('../validator/validator')
 const { uploadFile } = require('./awsController')
 
 const isValid = function (value) {
