@@ -109,13 +109,13 @@ const createUser = async function (req, res) {
             return res.status(400).send({ status: false, message: "Password length must be between 8 to 15 characters" })
         }
 
-/*************************upload image***********************************/
+        /*************************upload image***********************************/
 
 
         const profilePicture = await uploadFile(files[0])
 
 
-/*************************hashing password***********************************/
+        /*************************hashing password***********************************/
 
 
         const salt = 10
