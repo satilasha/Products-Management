@@ -6,6 +6,7 @@ aws.config.update({
     region: "ap-south-1"
 });
 
+
 let uploadFile = async (file) => {
     return new Promise(function (resolve, reject) {
         //this function will upload file to aws and return the link
@@ -17,6 +18,7 @@ let uploadFile = async (file) => {
             Body: file.buffer,
         };
 
+        
         s3.upload(uploadParams, function (err, data) {
             if (err) {
                 return reject({ "error": err });
