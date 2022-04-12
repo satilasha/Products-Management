@@ -132,7 +132,6 @@ const getProductbyid = async function (req, res) {
   
   module.exports.getProductbyid = getProductbyid
   
-const productModel = require("../model/productModel")
 
 const Productupdate = async function (req, res) {
     try {
