@@ -1,9 +1,9 @@
 const userModel = require('../model/userModel')
-const {uploadFile} = require('./awsController')
+const { uploadFile } = require('./awsController')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
-const saltRounds = 12
 const ObjectId = require('mongoose').Types.ObjectId
+
 
 
 /**********************validation*************************************/
@@ -18,10 +18,6 @@ const isValid = function (value) {
 const isValidPassword = function (password) {
     if (password.length > 7 && password.length < 16) return true
 }
-
-// const isValidPincode = function (password) {
-//     if (password.length > 6 && password.length < 6) return true
-// }
 
 
 
@@ -38,7 +34,7 @@ const createUser = async function (req, res) {
 
         const { fname, lname, email, phone, password } = data
 
-        
+
         if (!isValid(fname)) {
             return res.status(400).send({ status: false, message: "fname is required" })
         }
@@ -104,39 +100,47 @@ const createUser = async function (req, res) {
             return res.status(400).send({ status: false, msg: "Please provide valid Email Address" });
         }
 
-        let isValidPhone = (/^(\+91[\-\s]?)?[0]?(91)?[6789]\d{9}$/.test(phone))
-        if (!isValidPhone) {
+        if (!/^(\+91[\-\s]?)?[0]?(91)?[6789]\d{9}$/.test(phone)) {
             return res.status(400).send({ status: false, msg: "please provide valid phone" })
         }
 
-        // if (!isValidPincode(pincode)) {
-        //     return res.status(400).send({ status: false, message: "Please enter valid pincode" })
-        // }
 
 
         if (!isValidPassword(password)) {
             return res.status(400).send({ status: false, message: "Password length must be between 8 to 15 characters" })
         }
 
+        /*************************upload image***********************************/
+
+
         const profilePicture = await uploadFile(files[0])
 
 
-        const encyptedPassword = await bcrypt.hash(password, saltRounds)
+        /*************************hashing password***********************************/
+
+
+        const salt = 10
+
+        const encyptedPassword = await bcrypt.hash(password, salt)
 
         const userData = {
-            fname: fname, lname: lname, email: email, password: encyptedPassword, phone: phone, address: address, profileImage:profilePicture 
+            fname: fname, lname: lname, email: email, password: encyptedPassword, phone: phone, address: address, profileImage: profilePicture
         }
 
-
         const newUser = await userModel.create(userData)
+
         return res.status(201).send({ status: true, message: "user create successfully", data: newUser })
 
     } catch (error) {
         console.log(error)
+
         return res.status(500).send({ Error: error.message })
 
     }
 }
+
+
+/******************************login***********************************/
 
 
 const loginUser = async function (req, res) {
@@ -146,30 +150,44 @@ const loginUser = async function (req, res) {
         const data = req.body
 
         if (Object.keys(data) == 0) {
-            return res.staus(400).send({ status: false, message: "Please enter some data" })
+            return res.status(400).send({ status: false, message: "Please enter some data" })
         }
 
         let email = req.body.email;
         let pass = req.body.password;
 
+        if (!isValid(email)) {
+            return res.status(400).send({ status: false, message: "email is required" })
+        }
+
+        if (!/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email)) {
+            return res.status(400).send({ status: false, msg: "Please provide valid Email Address" });
+        }
 
         const user = await userModel.findOne({ email: email })
         if (!user) return res.status(400).send({ status: false, message: "Email is incorrect" })
 
-        const userId = user._id;
         const password = user.password;
+
+        if (!isValid(password)) {
+            return res.status(400).send({ status: false, message: "password is required" })
+        }
+
+        if (!isValidPassword(password)) {
+            return res.status(400).send({ status: false, message: "Password length must be between 8 to 15 characters" })
+        }
 
         const passMatch = await bcrypt.compare(pass, password)
         if (!passMatch) return res.status(400).send({ status: false, message: "Password is incorrect" })
 
         const token = jwt.sign({
 
-            userId: user._id.toString(),
+            userId: user._id,
 
         }, "Group26", { expiresIn: "30m" });
 
         res.setHeader("x-api-key", token);
-        return res.status(200).send({ status: true, message: "You are successfully logged in", userId: userId, token })
+        return res.status(200).send({ status: true, message: "User login successfully", data: { userId: user._id, token } })
 
 
     } catch (error) {
@@ -180,14 +198,17 @@ const loginUser = async function (req, res) {
 }
 
 
+/*************************get details***********************************/
+
+
 const getProfile = async function (req, res) {
     try {
         const userId = req.params.userId
 
         const getProfileData = await userModel.findOne({ _id: userId })
 
-        if(!getProfileData){
-            return res.status(400).send({status:false, message:"invalid userId"})
+        if (!getProfileData) {
+            return res.status(400).send({ status: false, message: "invalid userId" })
         }
 
         return res.status(200).send({ staus: true, data: getProfileData })
@@ -210,15 +231,15 @@ let updateUser = async function (req, res) {
         if (Object.keys(data).length == 0) {
             return res.status(400).send({ status: false, message: "Please enter data to update" })
         }
-        let validUser = await userModel.findOne({ _id: user_id})
+        let validUser = await userModel.findOne({ _id: user_id })
         if (!validUser)
             return res.status(404).send({ status: false, message: "No user found" })
 
-        const { fname, lname, email, phone, password ,profileImage} = data
+        const { fname, lname, email, phone, password, profileImage } = data
         if (Object.keys(data).includes('fname')) {
-        if (!isValid(fname)) {
-            return res.status(400).send({ status: false, message: "Please give a proper fname" })
-        }
+            if (!isValid(fname)) {
+                return res.status(400).send({ status: false, message: "Please give a proper fname" })
+            }
         }
         if (Object.keys(data).includes('lname')) {
             if (!isValid(lname)) {
@@ -233,7 +254,7 @@ let updateUser = async function (req, res) {
                 return res.status(400).send({ status: false, msg: "Please provide valid Email Address" });
             }
             const dupliEmail = await userModel.findOne({ email })
-            if (dupliEmail) { return res.status(400).send({ status: false, message: "Email already exists" }) }         
+            if (dupliEmail) { return res.status(400).send({ status: false, message: "Email already exists" }) }
         }
         if (Object.keys(data).includes('phone')) {
             if (!isValid(phone)) {
@@ -253,6 +274,8 @@ let updateUser = async function (req, res) {
             if (!isValidPassword(password)) {
                 return res.status(400).send({ status: false, message: "Password length must be between 8 to 15 characters" })
             }
+            const salt = 10
+            await bcrypt.hash(password, salt)
         }
         if (Object.keys(data).includes('profileImage')) {
             if (files.length == 0) { return res.status(400).send({ status: false, message: "Please provide a profile image" }) }
@@ -291,10 +314,10 @@ let updateUser = async function (req, res) {
                 }
                 //pincode validator
             }
-            
+
         }
 
-     
+
         let updateduser = await userModel.findOneAndUpdate(
             { _id: user_id },
             { $set: req.body },
@@ -310,7 +333,7 @@ let updateUser = async function (req, res) {
 
 
 
-        
+
 
 module.exports = { createUser, loginUser, getProfile }
 
