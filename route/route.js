@@ -19,6 +19,8 @@ router.get('/user/:userId/profile', middleware.authentication, userController.ge
 
 router.post('/products', productController.createProduct)
 
+router.delete('/products/:productId', productController.deleteProductById)
+
 module.exports = router
 
 

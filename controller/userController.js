@@ -2,6 +2,7 @@ const userModel = require('../model/userModel')
 const { uploadFile } = require('./awsController')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
+const ObjectId = require('mongoose').Types.ObjectId
 
 
 
@@ -221,6 +222,121 @@ const getProfile = async function (req, res) {
         return res.status(500).send({ Error: error.message })
     }
 }
+
+
+let updateUser = async function (req, res) {
+    try {
+        let data = req.body
+        let user_id = req.params.userId
+        let address = JSON.parse(req.body.address)
+        if (!ObjectId.isValid(user_id)) {
+            return res.status(400).send({ status: false, message: "Please enter a valid user Id" })
+        }
+        if (Object.keys(data).length == 0) {
+            return res.status(400).send({ status: false, message: "Please enter data to update" })
+        }
+        let validUser = await userModel.findOne({ _id: user_id })
+        if (!validUser)
+            return res.status(404).send({ status: false, message: "No user found" })
+
+        const { fname, lname, email, phone, password, profileImage } = data
+        if (Object.keys(data).includes('fname')) {
+            if (!isValid(fname)) {
+                return res.status(400).send({ status: false, message: "Please give a proper fname" })
+            }
+        }
+        if (Object.keys(data).includes('lname')) {
+            if (!isValid(lname)) {
+                return res.status(400).send({ status: false, message: "Please give a proper lname" })
+            }
+        }
+        if (Object.keys(data).includes('email')) {
+            if (!isValid(email)) {
+                return res.status(400).send({ status: false, message: "email is not valid" })
+            }
+            if (!/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email)) {
+                return res.status(400).send({ status: false, msg: "Please provide valid Email Address" });
+            }
+            const dupliEmail = await userModel.findOne({ email })
+            if (dupliEmail) { return res.status(400).send({ status: false, message: "Email already exists" }) }
+        }
+        if (Object.keys(data).includes('phone')) {
+            if (!isValid(phone)) {
+                return res.status(400).send({ status: false, message: "phone is not valid" })
+            }
+            let isValidPhone = (/^(\+91[\-\s]?)?[0]?(91)?[6789]\d{9}$/.test(phone))
+            if (!isValidPhone) {
+                return res.status(400).send({ status: false, msg: "please provide valid phone" })
+            }
+            const dupliPhone = await userModel.findOne({ phone })
+            if (dupliPhone) { return res.status(400).send({ status: false, message: "Phone number already exists" }) }
+        }
+        if (Object.keys(data).includes('password')) {
+            if (!isValid(password)) {
+                return res.status(400).send({ status: false, message: "password is not valid" })
+            }
+            if (!isValidPassword(password)) {
+                return res.status(400).send({ status: false, message: "Password length must be between 8 to 15 characters" })
+            }
+            const salt = 10
+            await bcrypt.hash(password, salt)
+        }
+        if (Object.keys(data).includes('profileImage')) {
+            if (files.length == 0) { return res.status(400).send({ status: false, message: "Please provide a profile image" }) }
+            await uploadFile(files[0])
+        }
+        if (Object.keys(data).includes(address)) {
+            if (Object.keys(address).includes('shipping.street')) {
+                if (!isValid(address.shipping.street)) {
+                    return res.status(400).send({ status: false, message: "street is not valid" })
+                }
+            }
+            if (Object.keys(address).includes('shipping.city')) {
+                if (!isValid(address.shipping.city)) {
+                    return res.status(400).send({ status: false, message: "city is not valid" })
+                }
+            }
+            if (Object.keys(address).includes('shipping.pincode')) {
+                if (!isValid(address.shipping.city)) {
+                    return res.status(400).send({ status: false, message: "pincode is not valid" })
+                }
+                //pincode validator
+            }
+            if (Object.keys(address).includes('billing.street')) {
+                if (!isValid(address.shipping.street)) {
+                    return res.status(400).send({ status: false, message: "street is not valid" })
+                }
+            }
+            if (Object.keys(address).includes('billing.city')) {
+                if (!isValid(address.shipping.city)) {
+                    return res.status(400).send({ status: false, message: "city is not valid" })
+                }
+            }
+            if (Object.keys(address).includes('billing.pincode')) {
+                if (!isValid(address.shipping.city)) {
+                    return res.status(400).send({ status: false, message: "pincode is not valid" })
+                }
+                //pincode validator
+            }
+
+        }
+
+
+        let updateduser = await userModel.findOneAndUpdate(
+            { _id: user_id },
+            { $set: req.body },
+            { new: true });
+
+        return res.status(200).send({ status: true, message: "User profile updated", data: updateduser });
+    } catch (error) {
+        res.status(500).send({ status: false, msg: error.message })
+    }
+}
+
+
+
+
+
 
 
 module.exports = { createUser, loginUser, getProfile }
