@@ -13,17 +13,15 @@ const createUser = async function (req, res) {
     try {
         const data = req.body
         let files = req.files;
-        let address = JSON.parse(req.body.address)
 
-        if (!validate.isValidRequestBody(JSON.parse(data))) {
+        if (!validate.isValidRequestBody(data)) {
             return res.status(400).send({ status: false, msg: "please enter the user details" });
-
         }
         if (files.length == 0) {
             return res.status(400).send({ status: false, message: "Please provide user's profile picture " })
         }
 
-        const { fname, lname, email, phone, password } = data
+        const { fname, lname, email, phone, password, address } = data
 
 
         if (!validate.isValid(fname)) {
@@ -210,9 +208,6 @@ let updateUser = async function (req, res) {
         if (!validate.isValidObjectId(user_id)) {
             return res.status(400).send({ status: false, message: "Please enter a valid user Id" })
         }
-        // if (Object.keys(data).length == 0) {
-        //     return res.status(400).send({ status: false, message: "Please enter data to update" })
-        // }
         let validUser = await userModel.findOne({ _id: user_id })
         if (!validUser)
             return res.status(404).send({ status: false, message: "No user found" })
