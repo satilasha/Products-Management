@@ -4,24 +4,6 @@ const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
 const { update } = require('../model/userModel')
 const validate = require('../validator/validator')
-const ObjectId = require('mongoose').Types.ObjectId
-
-
-
-/**************************validation*************************************/
-
-
-const isValid = function (value) {
-    if (typeof value === undefined || typeof value === null) return false
-    if (typeof value === 'string' && value.trim().length > 0) return true
-}
-
-
-const isValidPassword = function (password) {
-    if (password.length > 7 && password.length < 16) return true
-}
-
-
 
 /**********************create user*************************************/
 
@@ -225,7 +207,7 @@ let updateUser = async function (req, res) {
         let updateUserData = {}
         let files = req.files
 
-        if (!ObjectId.isValid(user_id)) {
+        if (validate.isValidObjectId(user_id)) {
             return res.status(400).send({ status: false, message: "Please enter a valid user Id" })
         }
         if (Object.keys(data).length == 0) {
