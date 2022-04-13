@@ -2,6 +2,7 @@ const userModel = require('../model/userModel')
 const { uploadFile } = require('./awsController')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
+const { update } = require('../model/userModel')
 const ObjectId = require('mongoose').Types.ObjectId
 
 
@@ -87,7 +88,7 @@ const createUser = async function (req, res) {
 
         /*************************************dupticate data***********************************/
 
-          
+
         const dupliEmail = await userModel.findOne({ email })
         if (dupliEmail) { return res.status(400).send({ status: false, message: "Email already exists" }) }
 
@@ -182,7 +183,7 @@ const loginUser = async function (req, res) {
         if (!passMatch) return res.status(400).send({ status: false, message: "Password is incorrect" })
 
 
-/******************************create token***********************************/
+        /******************************create token***********************************/
 
         const token = jwt.sign({
 
@@ -228,7 +229,8 @@ let updateUser = async function (req, res) {
     try {
         let data = req.body
         let user_id = req.params.userId
-        let address = JSON.parse(req.body.address)
+        let updateUserData = {}
+
         if (!ObjectId.isValid(user_id)) {
             return res.status(400).send({ status: false, message: "Please enter a valid user Id" })
         }
@@ -239,16 +241,18 @@ let updateUser = async function (req, res) {
         if (!validUser)
             return res.status(404).send({ status: false, message: "No user found" })
 
-        const { fname, lname, email, phone, password, profileImage } = data
+        const { fname, lname, email, phone, password, profileImage, address } = data
         if (Object.keys(data).includes('fname')) {
             if (!isValid(fname)) {
                 return res.status(400).send({ status: false, message: "Please give a proper fname" })
             }
+            updateUserData.fname = fname
         }
         if (Object.keys(data).includes('lname')) {
             if (!isValid(lname)) {
                 return res.status(400).send({ status: false, message: "Please give a proper lname" })
             }
+            updateUserData.lname = lname
         }
         if (Object.keys(data).includes('email')) {
             if (!isValid(email)) {
@@ -259,6 +263,8 @@ let updateUser = async function (req, res) {
             }
             const dupliEmail = await userModel.findOne({ email })
             if (dupliEmail) { return res.status(400).send({ status: false, message: "Email already exists" }) }
+
+            updateUserData.email = email
         }
         if (Object.keys(data).includes('phone')) {
             if (!isValid(phone)) {
@@ -270,6 +276,8 @@ let updateUser = async function (req, res) {
             }
             const dupliPhone = await userModel.findOne({ phone })
             if (dupliPhone) { return res.status(400).send({ status: false, message: "Phone number already exists" }) }
+
+            updateUserData.phone = phone
         }
         if (Object.keys(data).includes('password')) {
             if (!isValid(password)) {
@@ -279,52 +287,66 @@ let updateUser = async function (req, res) {
                 return res.status(400).send({ status: false, message: "Password length must be between 8 to 15 characters" })
             }
             const salt = 10
-            await bcrypt.hash(password, salt)
+            const encyptedPassword = await bcrypt.hash(password, salt)
+            updateUserData.password = encyptedPassword
+
         }
         if (Object.keys(data).includes('profileImage')) {
             if (files.length == 0) { return res.status(400).send({ status: false, message: "Please provide a profile image" }) }
-            await uploadFile(files[0])
-        }
-        if (Object.keys(data).includes(address)) {
-            if (Object.keys(address).includes('shipping.street')) {
-                if (!isValid(address.shipping.street)) {
-                    return res.status(400).send({ status: false, message: "street is not valid" })
-                }
-            }
-            if (Object.keys(address).includes('shipping.city')) {
-                if (!isValid(address.shipping.city)) {
-                    return res.status(400).send({ status: false, message: "city is not valid" })
-                }
-            }
-            if (Object.keys(address).includes('shipping.pincode')) {
-                if (!isValid(address.shipping.city)) {
-                    return res.status(400).send({ status: false, message: "pincode is not valid" })
-                }
-                //pincode validator
-            }
-            if (Object.keys(address).includes('billing.street')) {
-                if (!isValid(address.shipping.street)) {
-                    return res.status(400).send({ status: false, message: "street is not valid" })
-                }
-            }
-            if (Object.keys(address).includes('billing.city')) {
-                if (!isValid(address.shipping.city)) {
-                    return res.status(400).send({ status: false, message: "city is not valid" })
-                }
-            }
-            if (Object.keys(address).includes('billing.pincode')) {
-                if (!isValid(address.shipping.city)) {
-                    return res.status(400).send({ status: false, message: "pincode is not valid" })
-                }
-                //pincode validator
-            }
-
+            profileImage = await uploadFile(files[0])
+            updateUserData.profileImage = profileImage
         }
 
+        if (Object.keys(data).includes("address")) {
+            if (Object.keys(address).includes('shipping')) {
+                if (Object.keys(address.shipping).includes('street')) {
+                    if (!isValid(address.shipping.street)) {
+                        return res.status(400).send({ status: false, message: "street is not valid" })
+                    }
+                    updateUserData['address.shipping.street'] = data.address.shipping.street
+                }
+                if (Object.keys(address.shipping).includes('city')) {
+                    if (!isValid(address.shipping.city)) {
+                        return res.status(400).send({ status: false, message: "city is not valid" })
+                    }
+                    updateUserData['address.shipping.city'] = data.address.shipping.city
+                }
+                if (Object.keys(address.shipping).includes('pincode')) {
+                    if (!isValid(address.shipping.city)) {
+                        return res.status(400).send({ status: false, message: "pincode is not valid" })
+                    }
+                    //pincode validator
+                    updateUserData['address.shipping.pincode'] = data.address.shipping.pincode
+                }
+            }
 
+            if (Object.keys(address).includes('billing')) {
+                if (Object.keys(address.billing).includes('street')) {
+                    if (!isValid(address.billing.street)) {
+                        return res.status(400).send({ status: false, message: "street is not valid" })
+                    }
+                    updateUserData['address.billing.street'] = data.address.billing.street
+                }
+                if (Object.keys(address.billing).includes('city')) {
+                    if (!isValid(address.billing.city)) {
+                        return res.status(400).send({ status: false, message: "city is not valid" })
+                    }
+                    updateUserData['address.billing.city'] = data.address.billing.city
+                }
+
+                if (Object.keys(address.billing).includes('pincode')) {
+                    if (!isValid(address.billing.pincode)) {
+                        return res.status(400).send({ status: false, message: "pincode is not valid" })
+                    }
+                    //pincode validator
+                    updateUserData['address.billing.pincode'] = data.address.billing.pincode
+                }
+            }
+        }
+        console.log(updateUserData)
         let updateduser = await userModel.findOneAndUpdate(
             { _id: user_id },
-            { $set: req.body },
+            { $set: updateUserData },
             { new: true });
 
         return res.status(200).send({ status: true, message: "User profile updated", data: updateduser });
@@ -339,7 +361,7 @@ let updateUser = async function (req, res) {
 
 
 
-module.exports = { createUser, loginUser, getProfile , updateUser}
+module.exports = { createUser, loginUser, getProfile, updateUser }
 
 
 

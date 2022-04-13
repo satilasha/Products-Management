@@ -16,7 +16,7 @@ router.post('/login', userController.loginUser)
 
 router.get('/user/:userId/profile', middleware.authentication, userController.getProfile)
 
-router.put('/user/:userId/profile', middleware.authentication, userController.updateUser)
+router.put('/user/:userId/profile',  userController.updateUser)
 /**************************Product*************************/
 
 router.post('/products', productController.createProduct)
