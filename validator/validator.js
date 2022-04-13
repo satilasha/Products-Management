@@ -4,6 +4,7 @@ const isValid = (value) => {
     if (typeof value === 'string' && value.trim().length === 0) return false
     if (typeof value === 'undefined' || value === null) return false
     if (typeof value !== 'string') return false
+    // return /^[a-zA-Z\s]{0,255}$/.test(value)
     return true;
 }
 const isValidNum = (value) => {

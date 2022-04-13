@@ -92,8 +92,10 @@ const getProduct = async (req, res) => {
 
             if (Object.keys(filter).includes('size')) {
                 //size valid to be completed
-                let allSize = size.trim().split(',')
-                filterQuery.availableSizes = { $all: allSize }
+                let allSize = size.trim().split(',')  
+                console.log(allSize)
+                // filterQuery.availableSizes = { $all: allSize }
+                filterQuery.availableSizes = { $regex: `.*${size.trim()}.*`} 
             }
 
             if (Object.keys(filter).includes('priceGreaterThan')) {
