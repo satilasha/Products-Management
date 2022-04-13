@@ -145,8 +145,8 @@ const loginUser = async function (req, res) {
         let email = req.body.email;
         let pass = req.body.password;
 
-        if (!userName || !pass)
-        return res.status(400).send({ status: false, message: "Username or the password is not entered" });
+        if (!email || !pass)
+        return res.status(400).send({ status: false, message: "email or the password is not entered" });
 
         const user = await userModel.findOne({ email: email })
         if (!user) return res.status(400).send({ status: false, message: "Email is incorrect" })
