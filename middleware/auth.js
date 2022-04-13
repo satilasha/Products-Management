@@ -14,7 +14,7 @@ const authentication = (req, res, next) => {
         if((Date.now() > (decodeToken.exp * 1000))){
             return res.status(403).send({status : false, message : `session expired, please login again`})
             }
-        jwt.verify(token,  "this-is-aSecretTokenForLogin");
+        jwt.verify(token,  "Group26");
         req.loggedInUser = decodeToken.userId
         next()
        
