@@ -41,7 +41,7 @@ const createProduct = async function (req, res) {
             return res.status(400).send({ status: false, message: "please provide the product size" })
         }
         let sizeKeys = ["S", "XS", "M", "X", "L", "XXL", "XL"]
-        sizes = availableSizes.split(' ')
+        sizes = availableSizes.trim().split(' ')
         console.log(sizes)
         for (let i = 0; i < sizes.length; i++) {
             let sizePresent = sizeKeys.includes(sizes[i])
@@ -173,7 +173,7 @@ const Productupdate = async function (req, res) {
             return res.status(404).send({ status: false, msg: "product id does not exists" })
         }
 
-        if (Object.keys(reqBody).includes(title)) {
+        if (Object.keys(reqBody).includes('title')) {
             if (!validate.isValid(title)) {
                 return res.status(400).send({ status: false, message: 'Title is not valid' })
             }
@@ -183,36 +183,36 @@ const Productupdate = async function (req, res) {
             }
             updatedProductData.title = title
         };
-        if (Object.keys(reqBody).includes(description)) {
+        if (Object.keys(reqBody).includes('description')) {
             if (!validate.isValid(description)) {
                 return res.status(400).send({ status: false, message: 'description is not valid' })
             }
             updatedProductData.description = description
         };
-        if (Object.keys(reqBody).includes(price)) {
+        if (Object.keys(reqBody).includes('price')) {
             if (!validate.isValidNum(price)) {
                 return res.status(400).send({ status: false, message: 'price is not valid' })
             }
             updatedProductData.price = price
         };
-        if (Object.keys(reqBody).includes(isFreeShipping)) {
+        if (Object.keys(reqBody).includes('isFreeShipping')) {
             if (isFreeShipping != true || false) {
                 return res.status(400).send({ status: false, message: 'isFreeShipping should be true or false' })  
             };
             updatedProductData.isFreeShipping = isFreeShipping
         }
-        if (Object.keys(reqBody).includes(style)) {
+        if (Object.keys(reqBody).includes('style')) {
             if (!validate.isValid(style)) {
                 return res.status(400).send({ status: false, message: 'style is not valid' })
             }
             updatedProductData.style = style
         };
-        if (Object.keys(reqBody).includes(availableSizes)) {
+        if (Object.keys(reqBody).includes('availableSizes')) {
             if (!validate.isValid(availableSizes)) {
                 return res.status(400).send({ status: false, message: 'style is not valid' })
             }
             let sizeKeys = ["S", "XS", "M", "X", "L", "XXL", "XL"]
-            sizes = availableSizes.split(' ')
+            sizes = availableSizes.trim().split(' ')
             for (let i = 0; i < sizes.length; i++) {
                 let sizePresent = sizeKeys.includes(sizes[i])
                 if (!sizePresent)
@@ -220,7 +220,7 @@ const Productupdate = async function (req, res) {
             }
             updatedProductData.availableSizes = availableSizes
         };
-        if (Object.keys(data).includes(installments)) {
+        if (Object.keys(reqBody).includes('installments')) {
             if (!validate.isValidNum(installments)) {
                 return res.status(400).send({ status: false, message: "Please provide product's installments" })
             }
@@ -238,10 +238,8 @@ const Productupdate = async function (req, res) {
         }
 
 
-
-
         let updateProduct = await productModel.findOneAndUpdate({ _id: id },
-            UpdatedProductData, { new: true })
+            updatedProductData, { new: true })
         res.status(200).send({ status: true, msg: 'Success', data: { updateProduct } })
 
 
