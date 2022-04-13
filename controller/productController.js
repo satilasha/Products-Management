@@ -32,7 +32,7 @@ const createProduct = async function (req, res) {
         if (!validate.isValidNum(price)) {
             return res.status(400).send({ status: false, message: "Please provide valid product's price" })
         }
-        if (Object.keys(data).includes(style)) {
+        if (Object.keys(data).includes('style')) {
             if (!validate.isValid(style)) {
                 return res.status(400).send({ status: false, message: "Please provide product's style" })
             }
@@ -48,7 +48,7 @@ const createProduct = async function (req, res) {
             if (!sizePresent)
                 return res.status(400).send({ status: false, message: "Please give proper sizes among XS S M X L XXL XL" })
         }
-        if (Object.keys(data).includes(installments)) {
+        if (Object.keys(data).includes('installments')) {
             if (!validate.isValidNum(installments)) {
                 return res.status(400).send({ status: false, message: "Please provide product's installments" })
             }
