@@ -6,7 +6,13 @@ const isValid = (value) => {
     if (typeof value !== 'string') return false
     return true;
 }
-
+const isValidNum = (value) => {
+    
+    if (typeof value === 'undefined' || value === null) return false
+    return /^\d*\.?\d+$/.test(value)
+   
+      
+}
 const isValidRequestBody = (requestBody) => {
     if (Object.keys(requestBody).length > 0) {
         return true
@@ -44,6 +50,7 @@ module.exports = {
     isValidPhone,
     isValidPassword,
     isValidObjectId,
-    isValidPincode
+    isValidPincode,
+    isValidNum
    
 }

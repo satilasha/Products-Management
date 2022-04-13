@@ -2,48 +2,56 @@ const productModel = require('../model/productModel')
 const validate = require('../validator/validator')
 const { uploadFile } = require('./awsController')
 
-const isValid = function (value) {
-    if (typeof value === undefined || typeof value === null) return false
-    if (typeof value === 'string' && value.trim().length > 0) return true
-}
 
 const createProduct = async function (req, res) {
     try {
         const data = req.body
         const files = req.files
 
-        if (files.length == 0) { return res.status(400).send({ status: fale, message: "Please provide product's image" }) }
+        if (!validate.isValidRequestBody(data)) {
+            return res.status(400).send({ status: false, msg: "please enter the product details" });
+        }
+        if (files.length == 0) {
+            return res.status(400).send({ status: fale, message: "Please provide product's image" })
+        }
 
         const { title, description, price, style, availableSizes, installments } = data
 
-        if (!isValid(title)) {
+        if (!validate.isValid(title)) {
             return res.status(400).send({ status: false, message: "Please provide product's title" })
         }
-
         const alreadyTitle = await productModel.findOne({ title })
         if (alreadyTitle) {
             return res.status(400).send({ status: false, message: "Products title is already exists" })
         }
 
-        if (!isValid(description)) {
+        if (!validate.isValid(description)) {
             return res.status(400).send({ status: false, message: "Please provide product's description" })
         }
 
-
-        if (!isValid(price)) {
-            return res.status(400).send({ status: false, message: "Please provide product's price" })
+        if (!validate.isValidNum(price)) {
+            return res.status(400).send({ status: false, message: "Please provide valid product's price" })
         }
-
-        if (!isValid(style)) {
-            return res.status(400).send({ status: false, message: "Please provide product's style" })
+        if (Object.keys(data).includes(style)) {
+            if (!validate.isValid(style)) {
+                return res.status(400).send({ status: false, message: "Please provide product's style" })
+            }
         }
-
-        if (!isValid(availableSizes)) {
+        if (!validate.isValid(availableSizes)) {
             return res.status(400).send({ status: false, message: "please provide the product size" })
         }
-
-        if (!isValid(installments)) {
-            return res.status(400).send({ status: false, message: "Please provide product's installments" })
+        let sizeKeys = ["S", "XS", "M", "X", "L", "XXL", "XL"]
+        sizes = availableSizes.split(' ')
+        console.log(sizes)
+        for (let i = 0; i < sizes.length; i++) {
+            let sizePresent = sizeKeys.includes(sizes[i])
+            if (!sizePresent)
+                return res.status(400).send({ status: false, message: "Please give proper sizes among XS S M X L XXL XL" })
+        }
+        if (Object.keys(data).includes(installments)) {
+            if (!validate.isValidNum(installments)) {
+                return res.status(400).send({ status: false, message: "Please provide product's installments" })
+            }
         }
 
 
@@ -160,7 +168,7 @@ const Productupdate = async function (req, res) {
 
         const ProductData = {
             title: title, description: description, price: price, currencyId: "₹", currencyFormat: "INR",
-            isFreeShipping: isFreeShipping, productImage : profilePicture,
+            isFreeShipping: isFreeShipping, productImage: profilePicture,
             style: style, availableSizes: availableSizes, installments: installments
         }
         let updateProduct = await productModel.findOneAndUpdate({ _id: id },
