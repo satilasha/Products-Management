@@ -27,13 +27,23 @@ const isValidEmail = (email) => {
 const isValidPhone = (phone) => {
     return /^([+]\d{2})?\d{10}$/.test(phone)
 }
-
+const isValidPassword = (password) => {
+    if (8 <= password.length && 15 >= password.length)
+        return true
+    else
+        return false
+}
+const isValidPincode = (pincode) => {
+    return /^[1-9][0-9]{5}$/.test(pincode)
+}
 
 module.exports = {
     isValid,
     isValidRequestBody,
     isValidEmail,
     isValidPhone,
+    isValidPassword,
     isValidObjectId,
+    isValidPincode
    
 }
