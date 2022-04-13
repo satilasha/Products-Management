@@ -21,10 +21,19 @@ const isValidObjectId = (objectId) => {
         return false
 }
 
+const isValidEmail = (email) => {
+    return /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email)
+}
+const isValidPhone = (phone) => {
+    return /^([+]\d{2})?\d{10}$/.test(phone)
+}
+
+
 module.exports = {
     isValid,
     isValidRequestBody,
-    
+    isValidEmail,
+    isValidPhone,
     isValidObjectId,
    
 }

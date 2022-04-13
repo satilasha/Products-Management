@@ -3,6 +3,7 @@ const { uploadFile } = require('./awsController')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
 const { update } = require('../model/userModel')
+const validate = require('../validator/validator')
 const ObjectId = require('mongoose').Types.ObjectId
 
 
@@ -31,28 +32,46 @@ const createUser = async function (req, res) {
         const data = req.body
         let files = req.files;
         let address = JSON.parse(req.body.address)
-        if (files.length == 0) { return res.status(400).send({ status: false, message: "Please provide user's profile picture " }) }
+
+        if (!validate.isValidRequestBody(JSON.parse(data))) {
+            return res.status(400).send({ status: false, msg: "please enter the user details" });
+
+        }
+        if (files.length == 0) {
+             return res.status(400).send({ status: false, message: "Please provide user's profile picture " }) }
 
         const { fname, lname, email, phone, password } = data
 
 
-        if (!isValid(fname)) {
+        if (!validate.isValid(fname)) {
             return res.status(400).send({ status: false, message: "Please provide user's first name" })
         }
 
-        if (!isValid(lname)) {
+        if (!validate.isValid(lname)) {
             return res.status(400).send({ status: false, message: "Please provide user's last name" })
         }
 
-        if (!isValid(email)) {
+        if (!validate.isValid(email)) {
             return res.status(400).send({ status: false, message: "Please provide user's emailId" })
         }
-
-        if (!isValid(phone)) {
-            return res.status(400).send({ status: false, message: "Please provide user's phone number" })
+        if (!validate.isValidEmail(email.trim())) {
+            res.status(400).send({ status: false, message: `Invalid email` })
+            return
+        }
+        const isEmailAlreadyUsed = await userModel.findOne({ email });
+        if (isEmailAlreadyUsed) {
+            res.status(400).send({ status: false, message: `${email}  is already registered` })
+            return
         }
 
-        if (!isValid(password)) {
+        if (!validate.isValid(phone)) {
+            return res.status(400).send({ status: false, message: "Please provide user's phone number" })
+        }
+        if (!validate.isValidPhone(phone.trim())) {
+            res.status(400).send({ status: false, message: 'Phone number is not valid' })
+            return
+        }
+        if (!validate.isValid(password)) {
             return res.status(400).send({ status: false, message: "Please provide password" })
         }
 
@@ -171,11 +190,11 @@ const loginUser = async function (req, res) {
 
         const password = user.password;
 
-        if (!isValid(password)) {
+        if (!isValid(pass)) {
             return res.status(400).send({ status: false, message: "password is required" })
         }
 
-        if (!isValidPassword(password)) {
+        if (!isValidPassword(pass)) {
             return res.status(400).send({ status: false, message: "Password length must be between 8 to 15 characters" })
         }
 
@@ -230,6 +249,7 @@ let updateUser = async function (req, res) {
         let data = req.body
         let user_id = req.params.userId
         let updateUserData = {}
+        let files = req.files
 
         if (!ObjectId.isValid(user_id)) {
             return res.status(400).send({ status: false, message: "Please enter a valid user Id" })
@@ -240,9 +260,9 @@ let updateUser = async function (req, res) {
         let validUser = await userModel.findOne({ _id: user_id })
         if (!validUser)
             return res.status(404).send({ status: false, message: "No user found" })
-        if (user_id !== req.loggedInUser) {
-            return res.status(403).send({ satus: false, message: `Unauthorized access! Owner info doesn't match` })
-        }
+        // if (user_id !== req.loggedInUser) {
+        //     return res.status(403).send({ satus: false, message: `Unauthorized access! Owner info doesn't match` })
+        // }
         const { fname, lname, email, phone, password, profileImage, address } = data
         if (Object.keys(data).includes('fname')) {
             if (!isValid(fname)) {
@@ -293,10 +313,12 @@ let updateUser = async function (req, res) {
             updateUserData.password = encyptedPassword
 
         }
-        if (Object.keys(data).includes('profileImage')) {
-            if (files.length == 0) { return res.status(400).send({ status: false, message: "Please provide a profile image" }) }
-            profileImage = await uploadFile(files[0])
-            updateUserData.profileImage = profileImage
+        if (Object.keys(files).includes('profileImage')) {
+            if (files.length == 0) { 
+                return res.status(400).send({ status: false, message: "Please provide a profile image" }) }
+            //  profileImage = await uploadFile(files[0])
+
+            updateUserData.profileImage = await uploadFile(files[0])
         }
 
         if (Object.keys(data).includes("address")) {
@@ -345,6 +367,8 @@ let updateUser = async function (req, res) {
                 }
             }
         }
+        console.log(files)
+        console.log(data)
         console.log(updateUserData)
         let updateduser = await userModel.findOneAndUpdate(
             { _id: user_id },

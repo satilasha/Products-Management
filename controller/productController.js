@@ -145,10 +145,11 @@ const Productupdate = async function (req, res) {
     try {
         let reqBody = req.body
         let id = req.params.productId
+        let files = req.files
         if (Object.keys(reqBody).length == 0) {
             return res.status(400).send({ status: false, msg: "No data found" })
         }
-
+        const profilePicture = await uploadFile(files[0])
 
         const { title, description, price, isFreeShipping, style, availableSizes, installments } = reqBody
 
@@ -159,7 +160,7 @@ const Productupdate = async function (req, res) {
 
         const ProductData = {
             title: title, description: description, price: price, currencyId: "₹", currencyFormat: "INR",
-            isFreeShipping: isFreeShipping,
+            isFreeShipping: isFreeShipping, productImage : profilePicture,
             style: style, availableSizes: availableSizes, installments: installments
         }
         let updateProduct = await productModel.findOneAndUpdate({ _id: id },
