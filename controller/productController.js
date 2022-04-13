@@ -15,7 +15,7 @@ const createProduct = async function (req, res) {
             return res.status(400).send({ status: fale, message: "Please provide product's image" })
         }
 
-        const { title, description, price, style, availableSizes, installments } = data
+        const { title, description, price, style, availableSizes, installments, currencyId, currencyFormat } = data
 
         if (!validate.isValid(title)) {
             return res.status(400).send({ status: false, message: "Please provide product's title" })
@@ -40,6 +40,12 @@ const createProduct = async function (req, res) {
         if (!validate.isValid(availableSizes)) {
             return res.status(400).send({ status: false, message: "please provide the product size" })
         }
+        if (!validate.isValid(currencyId)) {
+            return res.status(400).send({ status: false, message: "Please provide valid product's currencyId" })
+        }
+        if (!validate.isValid(currencyFormat)) {
+            return res.status(400).send({ status: false, message: "Please provide valid product's currencyFormat" })
+        }
         let sizeKeys = ["S", "XS", "M", "X", "L", "XXL", "XL"]
         sizes = availableSizes.trim().split(' ')
         console.log(sizes)
@@ -57,7 +63,7 @@ const createProduct = async function (req, res) {
 
         const newProductImage = await uploadFile(files[0])
 
-        const productData = { title, description, price, productImage: newProductImage, style, availableSizes, installments }
+        const productData = { title, description, price, productImage: newProductImage, style, availableSizes, installments, currencyId, currencyFormat }
 
         const newProduct = await productModel.create(productData)
 
@@ -166,7 +172,7 @@ const Productupdate = async function (req, res) {
             return res.status(400).send({ status: false, msg: "Please give data to update" })
         }
 
-        let { title, description, price, currencyId, currencyFormat, isFreeShipping, style, availableSizes, installments, productImage } = reqBody
+        let { title, description, price, currencyId, currencyFormat, isFreeShipping, style, availableSizes, installments } = reqBody
 
         const findProduct = await productModel.findOne({ _id: id, isDeleted: false })
         if (!findProduct) {
@@ -195,9 +201,23 @@ const Productupdate = async function (req, res) {
             }
             updatedProductData.price = price
         };
+
+        if (Object.keys(reqBody).includes('currencyId')) {
+            if (!validate.isValid(currencyId)) {
+                return res.status(400).send({ statas: false, message: 'currencyId is not valid' })
+            }
+            updatedProductData.currencyId = currencyId
+        }
+        if (Object.keys(reqBody).includes('currencyFormat')) {
+            if (!validate.isValid(currencyFormat)) {
+                return res.status(400).send({ statas: false, message: 'currencyId is not valid' })
+            }
+            updatedProductData.currencyFormat = currencyFormat
+        }
+
         if (Object.keys(reqBody).includes('isFreeShipping')) {
             if (isFreeShipping != true || false) {
-                return res.status(400).send({ status: false, message: 'isFreeShipping should be true or false' })  
+                return res.status(400).send({ status: false, message: 'isFreeShipping should be true or false' })
             };
             updatedProductData.isFreeShipping = isFreeShipping
         }
@@ -226,13 +246,13 @@ const Productupdate = async function (req, res) {
             }
             updatedProductData.installments = installments
         }
-        if(files.length > 0){
+        if (files.length > 0) {
             if (Object.keys(files[0]).includes('fieldname')) {
                 if (files.length == 0) {
                     return res.status(400).send({ status: false, message: "Please provide a product image" })
                 }
-                 productImage = await uploadFile(files[0])
-    
+                productPicture = await uploadFile(files[0])
+
                 updatedProductData.productImage = productPicture
             }
         }
@@ -260,9 +280,13 @@ const deleteProductById = async function (req, res) {
             return res.status(400).send({ status: false, message: "Valid productId is required" })
         }
 
-        const searchProduct = await productModel.findOne({ _id: productId, isDeleted: false })
+        const searchProduct = await productModel.findOne({ _id: productId })
         if (!searchProduct) {
             return res.status(400).send({ status: false, message: "product does't exists" })
+        }
+
+        if (searchProduct.isDeleted == true) {
+            return res.status(400).send({ status: false, message: "product is already is deleted" })
         }
 
         const deleteProduct = await productModel.findOneAndUpdate({ _id: productId, isDeleted: false }, { isDeleted: true, deletedAt: new Date() }, { new: true })
