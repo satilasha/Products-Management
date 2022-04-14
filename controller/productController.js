@@ -1,6 +1,7 @@
 const productModel = require('../model/productModel')
 const validate = require('../validator/validator')
 const { uploadFile } = require('./awsController')
+const moment = require("moment")
 
 
 const createProduct = async function (req, res) {
@@ -40,10 +41,10 @@ const createProduct = async function (req, res) {
         if (!validate.isValid(availableSizes)) {
             return res.status(400).send({ status: false, message: "please provide the product size" })
         }
-        if (!validate.isValid(currencyId)) {
+        if (!validate.isValidString(currencyId)) {
             return res.status(400).send({ status: false, message: "Please provide valid product's currencyId" })
         }
-        if (!validate.isValid(currencyFormat)) {
+        if (!validate.isValidString(currencyFormat)) {
             return res.status(400).send({ status: false, message: "Please provide valid product's currencyFormat" })
         }
         let sizeKeys = ["S", "XS", "M", "X", "L", "XXL", "XL"]
@@ -205,14 +206,14 @@ const Productupdate = async function (req, res) {
         };
 
         if (Object.keys(reqBody).includes('currencyId')) {
-            if (!validate.isValid(currencyId)) {
+            if (!validate.isValidString(currencyId)) {
                 return res.status(400).send({ statas: false, message: 'currencyId is not valid' })
             }
             updatedProductData.currencyId = currencyId
         }
         if (Object.keys(reqBody).includes('currencyFormat')) {
-            if (!validate.isValid(currencyFormat)) {
-                return res.status(400).send({ statas: false, message: 'currencyId is not valid' })
+            if (!validate.isValidString(currencyFormat)) {
+                return res.status(400).send({ statas: false, message: 'formate is not valid' })
             }
             updatedProductData.currencyFormat = currencyFormat
         }
@@ -290,6 +291,8 @@ const deleteProductById = async function (req, res) {
         if (searchProduct.isDeleted == true) {
             return res.status(400).send({ status: false, message: "product is already is deleted" })
         }
+
+        productId.deletedAt = moment().format("MMM Do YY")
 
         const deleteProduct = await productModel.findOneAndUpdate({ _id: productId, isDeleted: false }, { isDeleted: true, deletedAt: new Date() }, { new: true })
 

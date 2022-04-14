@@ -3,16 +3,15 @@ const ObjectId = require('mongoose').Types.ObjectId
 const isValid = (value) => {
     if (typeof value === 'string' && value.trim().length === 0) return false
     if (typeof value === 'undefined' || value === null) return false
-<<<<<<< HEAD
     if (typeof value !== 'string') return false
-    // return /^[a-zA-Z\s]{0,255}$/.test(value)
-    return true;
-=======
-    return /^[a-zA-Z\s]{0,255}$/.test(value)
-
->>>>>>> 902c2894c6c86e182dbeacd32192ac887155a5e5
+    return true
+    
 }
 
+const isValidString = (value) =>{
+    if (typeof value === 'undefined' || value === null) return false
+    return /^[a-zA-Z\s]{0,255}$/.test(value)
+}
 const isValidNum = (value) => {
 
     if (typeof value === 'undefined' || value === null) return false
@@ -58,6 +57,7 @@ module.exports = {
     isValidPassword,
     isValidObjectId,
     isValidPincode,
-    isValidNum
+    isValidNum,
+    isValidString
 
 }
