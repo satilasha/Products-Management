@@ -49,7 +49,7 @@ const createUser = async function (req, res) {
             return res.status(400).send({ status: false, message: "Please provide user's phone number" })
         }
         if (!validate.isValidPhone(phone)) {
-            res.status(400).send({ status: false, message: 'Phone number is not valid' })
+            res.status(400).send({ status: false, message: 'Enter a phone number without 0 or +91' })
             return
         }
         const isPhoneAlreadyUsed = await userModel.findOne({ phone: phone });
@@ -204,6 +204,10 @@ let updateUser = async function (req, res) {
         let user_id = req.params.userId
         let updateUserData = {}
         let files = req.files
+
+        if (!validate.isValidRequestBody(reqBody) && !files) {
+            return res.status(400).send({ status: false, msg: "Please give data to update" })
+        }
 
         if (!validate.isValidObjectId(user_id)) {
             return res.status(400).send({ status: false, message: "Please enter a valid user Id" })
