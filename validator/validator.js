@@ -5,7 +5,6 @@ const isValid = (value) => {
     if (typeof value === 'undefined' || value === null) return false
     if (typeof value !== 'string') return false
     return true
-    
 }
 
 const isValidString = (value) =>{
@@ -37,7 +36,7 @@ const isValidEmail = (email) => {
     return /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email)
 }
 const isValidPhone = (phone) => {
-    return /^([+]\d{2})?\d{10}$/.test(phone)
+    return /^[6-9]\d{9}$/.test(phone)
 }
 const isValidPassword = (password) => {
     if (8 <= password.length && 15 >= password.length)
