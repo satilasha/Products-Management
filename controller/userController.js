@@ -205,7 +205,7 @@ let updateUser = async function (req, res) {
         let updateUserData = {}
         let files = req.files
 
-        if (!validate.isValidRequestBody(reqBody) && !files) {
+        if (!validate.isValidRequestBody(data) && !files) {
             return res.status(400).send({ status: false, msg: "Please give data to update" })
         }
 
@@ -219,6 +219,7 @@ let updateUser = async function (req, res) {
         //     return res.status(403).send({ satus: false, message: `Unauthorized access! Owner info doesn't match` })
         // }
         let { fname, lname, email, phone, password, profileImage, address } = data
+        
         if (Object.keys(data).includes('fname')) {
             if (!validate.isValid(fname)) {
                 return res.status(400).send({ status: false, message: "Please give a proper fname" })
@@ -332,9 +333,9 @@ let updateUser = async function (req, res) {
                 }
             }
         }
-        console.log(files)
+        // console.log(files)
         // console.log(data)
-        // console.log(updateUserData)
+        console.log(updateUserData)
         let updateduser = await userModel.findOneAndUpdate(
             { _id: user_id },
             { $set: updateUserData },
