@@ -27,6 +27,9 @@ router.put('/products/:productId', productController.Productupdate)
 router.delete('/products/:productId', productController.deleteProductById)
 
 router.post('/users/:userId/cart', cartController.addProduct)
+router.put('/users/:userId/cart', cartController.updateCart)
+router.get('/users/:userId/cart', cartController.getCartById)
+router.delete('/users/:userId/cart', cartController.deletedCart)
 
 module.exports = router
 
