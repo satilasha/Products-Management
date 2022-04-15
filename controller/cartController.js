@@ -154,8 +154,6 @@ const updateCart = async function (req, res) {
         }
 
         if(removeProduct == 1){
-            return res.send({msg :"1"})
-
            
             let totalPrice =  product.price;
                      
@@ -173,7 +171,6 @@ const updateCart = async function (req, res) {
                             return res.status(201).send({ status: true, data: newProduct });
                         }
 
-                        // let ss = items[i]
                         const newProduct = await cartModel.findOneAndUpdate(
                             { userId: userId, items: { $elemMatch: { productId: productId } } },
                             { $inc: { "items.$.quantity": -1 }, $set: { totalPrice: totalPrice, totalItems: totalItems } },
@@ -186,32 +183,25 @@ const updateCart = async function (req, res) {
                
         
             }else if(removeProduct==0){
-                // return res.send('cart')
-                return res.send({msg:"0"})
-
-                
+                            
                      
                 for (i = 0; i < cartPresent.items.length; i++) {
                    
                     if (cartPresent.items[i].productId == productId) {
-//                         let totalPrice =  cartPresent.items[i].quantity * product.price;
-//                         console.log(cartPresent.items[i].quantity)
-//                         // console.log(totalPrice)
-//                         let b = parseInt(cartPresent.totalItems) - parseInt(cartPresent.items[i].quantity)
-//                         console.log(b)
-//                        let a =  cartPresent.totalPrice - totalPrice 
-// console.log(a )
-                        // if(cartPresent.items[i].quantity == 1){
+                        let totalPrice =  cartPresent.items[i].quantity * product.price;                   
+                        let totalItems= parseInt(cartPresent.totalItems) - parseInt(cartPresent.items[i].quantity)             
+                       totalPrice =  cartPresent.totalPrice - totalPrice 
+                     
                             const newProduct = await cartModel.findOneAndUpdate(
                                 { userId: userId, items: { $elemMatch: { productId: productId } } },
-                                { $pull: { items:{productId:productId}, $dc: { totalPrice: 1, totalItems: 1 }} },
+                                { $pull: { items:{productId:productId}, $dc: { totalPrice: totalPrice, totalItems: totalItems }} },
                                 { new: true }
                             )
                             return res.status(201).send({ status: true, data: newProduct });
                         }else{
                             return res.send({status:false, msg:"product does not exists in cart"})
                         }
-                    // }
+                    
                 }
             }
         
