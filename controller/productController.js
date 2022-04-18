@@ -1,7 +1,6 @@
 const productModel = require('../model/productModel')
 const validate = require('../validator/validator')
 const { uploadFile } = require('./awsController')
-const moment = require("moment")
 
 
 const createProduct = async function (req, res) {
@@ -75,6 +74,7 @@ const createProduct = async function (req, res) {
 }
 const getProduct = async (req, res) => {
     try {
+        console.log(req.headers)
         let filterQuery = { isDeleted: false, deletedAt: null };
         let filter = req.query;
         let Sort;
@@ -97,13 +97,13 @@ const getProduct = async (req, res) => {
 
             if (Object.keys(filter).includes('size')) {
                 let sizeKeys = ["S", "XS", "M", "X", "L", "XXL", "XL"]
-                sizeArr = size.trim().split(',')
+                sizeArr = size.trim().split(' ')
                 for (let i = 0; i < sizeArr.length; i++) {
                     let sizePresent = sizeKeys.includes(sizeArr[i])
                     if (!sizePresent)
                         return res.status(400).send({ status: false, message: "Please give proper sizes among XS S M X L XXL XL" })
                 }
-                let allSize = size.trim().split(',')  
+                let allSize = size.trim().split(' ')  
                 console.log(allSize)
                 filterQuery.availableSizes = { $in: allSize }
             }
@@ -120,11 +120,17 @@ const getProduct = async (req, res) => {
                 }
                 filterQuery.price = { $lte: priceLessThan };
             }
-            // if (Object.keys(filter).includes(('priceLessThan' && 'priceGreaterThan'))) {
-            //     filterQuery.price = { $gte: priceGreaterThan, $lte: priceLessThan };
-            // }
+            if(filter.hasOwnProperty("priceLessThan",'priceGreaterThan')){
+                if (!validate.isValidNum(priceLessThan)) {
+                    return res.status(400).send({ status: false, msg: "Please give valid price" })
+                }
+                if (!validate.isValidNum(priceGreaterThan)) {
+                    return res.status(400).send({ status: false, msg: "Please give valid price" })
+                }
+                filterQuery.price = { $lte: priceLessThan, $gte: priceGreaterThan};
+            }
         }
-        console.log(filterQuery)
+        // console.log(filterQuery)
 
         const product = await productModel.find(filterQuery).sort({ price: Sort });
         if (product.length == 0) {
@@ -151,7 +157,7 @@ const getProductbyid = async function (req, res) {
 
 
         const product = await productModel.findOne({ _id: productId, isDeleted: false })
-        if (!product) { return res.status(400).send({ status: false, message: "No data found" }) }
+        if (!product) { return res.status(404).send({ status: false, message: "No data found" }) }
 
         return res.status(200).send({ status: true, message: "Product Data", data: product })
     }
@@ -181,7 +187,7 @@ const Productupdate = async function (req, res) {
 
         const findProduct = await productModel.findOne({ _id: id, isDeleted: false })
         if (!findProduct) {
-            return res.status(404).send({ status: false, msg: "product id does not exists" })
+            return res.status(404).send({ status: false, msg: "product not found" })
         }
 
         if (Object.keys(reqBody).includes('title')) {
@@ -286,14 +292,13 @@ const deleteProductById = async function (req, res) {
 
         const searchProduct = await productModel.findOne({ _id: productId })
         if (!searchProduct) {
-            return res.status(400).send({ status: false, message: "product does't exists" })
+            return res.status(404).send({ status: false, message: "product does't exists" })
         }
 
         if (searchProduct.isDeleted == true) {
             return res.status(400).send({ status: false, message: "product is already is deleted" })
         }
 
-        productId.deletedAt = moment().format("MMM Do YY")
 
         const deleteProduct = await productModel.findOneAndUpdate({ _id: productId, isDeleted: false }, { isDeleted: true, deletedAt: new Date() }, { new: true })
 

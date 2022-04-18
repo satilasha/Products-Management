@@ -4,6 +4,9 @@ const jwt = require("jsonwebtoken")
 const authentication = (req, res, next) => {
     try {
         // const bearerToken = req.headers["authorization"]
+        // if (!bearerToken) {
+        //     return res.status(400).send({ status: false, msg: "please enter token " })
+        // }
         // const token = bearerToken.split(" ")[1]
 
         const token = req.headers["x-api-key"]

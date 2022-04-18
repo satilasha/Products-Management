@@ -1,53 +1,59 @@
 const mongoose = require('mongoose')
 
-const userSchema = new mongoose.Schema ({
-    fname:{
-        type: String,
-        required: true
-    },
-
-    lname:{
-        type: String,
-        required: true
-    }, 
-
-    email:{
+const userSchema = new mongoose.Schema({
+    fname: {
         type: String,
         required: true,
-        unique: true
+        trim: true
     },
 
-    profileImage:{
+    lname: {
+        type: String,
+        required: true,
+        trim: true
+    },
+
+    email: {
+        type: String,
+        required: true,
+        unique: true,
+        trim: true,
+        lowercase: true
+    },
+
+    profileImage: {
         type: String,
         requierd: true
     },
-    
-    phone:{
+
+    phone: {
         type: String,
         required: true,
-        unique: true
+        unique: true,
+        trim: true
     },
 
-    password:{
+    password: {
         type: String,
-        required: true
+        required: true,
+        trim: true
     },
 
-    address:{
-        shipping:{
-            street:{type: String, required: true},
-            city:{type: String, required: true},
-            pincode:{type: String, required: true}
+    address: {
+        shipping: {
+            street: { type: String, required: true, trim: true },
+            city: { type: String, required: true, trim: true },
+            pincode: { type: String, required: true, trim: true }
         },
 
-        billing:{
-            street:{type: String, required: true},
-            city:{type: String, required: true},
-         pincode:{type: String, required: true}
+        billing: {
+            street: { type: String, required: true, trim: true },
+            city: { type: String, required: true, trim: true },
+            pincode: { type: String, required: true, trim: true }
         }
     }
 
-},{timestamps: true})
+}, { timestamps: true })
 
 
 module.exports = mongoose.model('User', userSchema)

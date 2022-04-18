@@ -4,6 +4,7 @@ const router = express.Router()
 const userController = require('../controller/userController')
 const productController = require('../controller/productController')
 const cartController = require('../controller/cartController')
+const orderController = require('../controller/orderController')
 
 
 const middleware = require('../middleware/auth')
@@ -26,11 +27,14 @@ router.get('/products/:productId', productController.getProductbyid)
 router.put('/products/:productId', productController.Productupdate)
 router.delete('/products/:productId', productController.deleteProductById)
 
-router.post('/users/:userId/cart', cartController.addProduct)
-router.put('/users/:userId/cart', cartController.updateCart)
-router.get('/users/:userId/cart', cartController.getCartById)
-router.delete('/users/:userId/cart', cartController.deletedCart)
+router.post('/users/:userId/cart', middleware.authentication,cartController.addProduct)
+router.put('/users/:userId/cart', middleware.authentication,cartController.updateCart)
+router.get('/users/:userId/cart', middleware.authentication,cartController.getCartById)
+router.delete('/users/:userId/cart', middleware.authentication,cartController.deletedCart)
 
+
+router.post('/users/:userId/orders', middleware.authentication, orderController.createOrder)
+router.put('/users/:userId/orders', middleware.authentication, orderController.updateOrder)
 module.exports = router
 
 
