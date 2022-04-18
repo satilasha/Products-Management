@@ -125,6 +125,13 @@ const updateOrder = async function (req, res) {
         if (!checkOrder) {
             return res.status(400).send({ status: false, message: "Order Id not found" })
         }
+        
+        if (!validate.isValid(status)) {
+            return res.status(400).send({ status: false, msg: "enter the status" });
+        }
+        if (!validate.isValidStatus(status)) {
+            return res.status(400).send({ status: false, msg: `enter valid status` });
+        }
 
         if (checkOrder.cancellable != true && status == 'cancelled') {
             return res.status(400).send({ status: false, message: "Can't cancel the order" })
