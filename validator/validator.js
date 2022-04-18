@@ -47,6 +47,9 @@ const isValidPassword = (password) => {
 const isValidPincode = (pincode) => {
     return /^[1-9][0-9]{5}$/.test(pincode)
 }
+const isValidStatus = (status) => {
+    return ['pending', 'completed', 'cancelled'].indexOf(status) !== -1
+}
 
 module.exports = {
     isValid,
@@ -57,6 +60,7 @@ module.exports = {
     isValidObjectId,
     isValidPincode,
     isValidNum,
-    isValidString
+    isValidString,
+    isValidStatus
 
 }

@@ -215,9 +215,9 @@ let updateUser = async function (req, res) {
         let validUser = await userModel.findOne({ _id: user_id })
         if (!validUser)
             return res.status(404).send({ status: false, message: "No user found" })
-        // if (user_id !== req.loggedInUser) {
-        //     return res.status(403).send({ satus: false, message: `Unauthorized access! Owner info doesn't match` })
-        // }
+        if (user_id !== req.loggedInUser) {
+            return res.status(403).send({ satus: false, message: `Unauthorized access! Owner info doesn't match` })
+        }
         let { fname, lname, email, phone, password, profileImage, address } = data
         
         if (Object.keys(data).includes('fname')) {

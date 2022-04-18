@@ -1,3 +1,4 @@
+const cartModel = require('../model/cartModel')
 const orderModel = require('../model/orderModel')
 const validate = require('../validator/validator')
 
@@ -8,16 +9,14 @@ const createOrder = async function (req, res) {
     try {
         let reqbody = req.body
 
-        // const jwtUserId = req.userId
+        const user_id = req.params.userId
 
-        const user_id  = req.params.userId
 
-        // if (!(user_id === jwtUserId)) {
-        //     return res.status(400).send({ status: false, msg: "unauthorized access" })
-        // }
-
-        if(!validate.isValidObjectId(user_id )){
-            return res.status(400).send({status: false, message: "Valid userId is required"})
+        if (!validate.isValidObjectId(user_id)) {
+            return res.status(400).send({ status: false, message: "Valid userId is required" })
+        }
+        if (userId !== req.loggedInUser) {
+            return res.status(403).send({ satus: false, message: `Unauthorized access! Owner info doesn't match` })
         }
         if (!validate.isValidRequestBody(reqbody)) {
             return res.status(400).send({ status: false, message: "Please enter the order details" })
@@ -46,7 +45,7 @@ const createOrder = async function (req, res) {
         if (!validate.isValid(productId)) {
             return res.status(400).send({ status: false, msg: "enter the productId" });
         }
-    
+
         if (!validate.isValidObjectId(productId)) {
             return res.status(400).send({ status: false, msg: "enter a valid productId" });
         }
@@ -92,40 +91,50 @@ const createOrder = async function (req, res) {
 /*******update order************/
 
 
-const updateOrder = async function(req, res){
+const updateOrder = async function (req, res) {
     try {
         let reqbody = req.body
 
         const userId = req.params.userId
-
-        const {orderId} = reqbody
-
-        if(!validate.isValidRequestBody(reqbody)){
-            return res.status(400).send({status: false, message: "Please enter cart details"})
+        if (!validate.isValidObjectId(userId)) {
+            return res.status(400).send({ status: false, msg: "Invalid userId" });
+        }
+        if (userId !== req.loggedInUser) {
+            return res.status(403).send({ satus: false, message: `Unauthorized access! Owner info doesn't match` })
+        }
+        const user = await userModel.findOne({ _id: userId });
+        if (!user) {
+            return res.status(404).send({ status: false, msg: "user does not exists" });
         }
 
-        if(!validate.isValid(orderId)){
-            return res.status(400).send({status: false, message: "Please enter order Id"})
+        const { orderId, status } = reqbody
+
+        if (!validate.isValidRequestBody(reqbody)) {
+            return res.status(400).send({ status: false, message: "Please enter cart details" })
         }
 
-        if(!validate.isValidObjectId(orderId)){
-            return res.status(400).send({status: false, message: "Please enter valid order Id"})
+        if (!validate.isValid(orderId)) {
+            return res.status(400).send({ status: false, message: "Please enter order Id" })
         }
 
-        const checkOrder = await orderModel.findOne({_id:orderId })
-        if(!checkOrder){
-        return res.status(400).send({status: false, message: "Order Id not found"})
+        if (!validate.isValidObjectId(orderId)) {
+            return res.status(400).send({ status: false, message: "Please enter valid order Id" })
         }
 
-        if(checkOrder.cancellable!=true){
-            return res.status(400).send({status: false, message: "Can't cancel the order"})
+        const checkOrder = await orderModel.findOne({ _id: orderId })
+        if (!checkOrder) {
+            return res.status(400).send({ status: false, message: "Order Id not found" })
         }
 
-        if(checkOrder.userId!=userId){
-            return res.status(400).send({status: false, message: "User Id can't match with the order Id"})
+        if (checkOrder.cancellable != true && status == 'cancelled') {
+            return res.status(400).send({ status: false, message: "Can't cancel the order" })
         }
 
-        const updtOrder = await orderModel.findOneAndUpdate({_id:orderId}, {status: "cancelled"},{new: true} )
+        if (checkOrder.userId != userId) {
+            return res.status(400).send({ status: false, message: "User Id can't match with the order Id" })
+        }
+
+        const updtOrder = await orderModel.findOneAndUpdate({ _id: orderId }, { status: status }, { new: true })
         res.status(200).send({ status: true, msg: 'sucesfully updated', data: updtOrder })
     } catch (error) {
         console.log(error)
@@ -133,5 +142,70 @@ const updateOrder = async function(req, res){
     }
 }
 
+// const createOrder = async function (req, res) {
+//     try {
+//         const userId = req.params.userId;
+//         if (!validate.isValidObjectId(userId)) {
+//             return res.status(400).send({ status: false, msg: "Invalid userId" });
+//         }
+// if (userId !== req.loggedInUser) {
+//     return res.status(403).send({ satus: false, message: `Unauthorized access! Owner info doesn't match` })
+// }
+//         const user = await userModel.findOne({ _id: userId });
+//         if (!user) {
+//             return res.status(404).send({ status: false, msg: "user does not exists" });
+//         }
+//         const cartPresent = await cartModel.findOne({ userId: userId });
+//         if (!cartPresent) {
+//             return res.status(404).send({ status: false, msg: "cart not found" });
+//         }
+//         const data = req.body;
+//         const { cancellable, status } = data;
+
+//         if (Object.keys(data).includes('cancellable')) {
+//             if (!(cancellable == true || cancellable == false)) {
+//                 return res.status(400).send({ status: false, message: 'cancellable should be true or false' })
+//             };
+//         }
+
+//         if (!validate.isValid(status)) {
+//             return res.status(400).send({ status: false, msg: "enter the status" });
+//         }
+//         if (!validate.isValidStatus(status)) {
+//             return res.status(400).send({ status: false, msg: `enter valid status` });
+//         }
+//         if (cancellable == false && status == 'cancelled') {
+//             return res.status(400).send({ status: false, msg: `order cannot be cancelled` });
+//         }
+//         if (cancellable == true && status == 'completed') {
+//             return res.status(400).send({ status: false, msg: `order cannot be cancelled after completion` });
+//         }
+//         if (status == 'completed') {
+//             cancellable = false
+//         }
+//         let totalQuantity = 0
+//         for (let i = 0; i < cartPresent.items.length; i++) {
+//             totalQuantity = totalQuantity + cartPresent.items[i].totalQuantity
+//         }
+
+//         const newOrder = {
+//             userId: cartPresent.userId,
+//             items: cartPresent.items,
+//             totalPrice: cartPresent.totalPrice,
+//             totalItems: cartPresent.totalItems,
+//             totalQuantity: totalQuantity,
+//             cancellable,
+//             status,
+//         };
+//         const createOrder = await orderModel.create(newOrder);
+
+//         res.status(201).send({ status: true, message: "successfully create order", data: createOrder });
+
+
+//     } catch (error) {
+//         console.log(error)
+//         return res.status(500).send({ Error: error.message })
+//     }
+// }
 
 module.exports = { createOrder, updateOrder }

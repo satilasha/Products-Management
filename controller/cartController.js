@@ -26,12 +26,12 @@ const addProduct = async (req, res) => {
         if (!validate.isValidObjectId(userId)) {
             return res.status(400).send({ status: false, msg: "Invalid userId" });
         }
-        // if (user_id !== req.loggedInUser) {
-        //     return res.status(403).send({ satus: false, message: `Unauthorized access! Owner info doesn't match` })
-        // }
-        // if (user_id !== userId) {
-        //     return res.status(403).send({ satus: false, message: `Unauthorized access! Owner info doesn't match` })
-        // }
+        if (user_id !== req.loggedInUser) {
+            return res.status(403).send({ satus: false, message: `Unauthorized access! Owner info doesn't match` })
+        }
+        if (user_id !== userId) {
+            return res.status(403).send({ satus: false, message: `Unauthorized access! Owner info doesn't match` })
+        }
         if (!validate.isValid(items)) {
             return res.status(400).send({ status: false, msg: "enter items" });
         }
@@ -123,9 +123,9 @@ const updateCart = async function (req, res) {
         if (!user) {
             return res.status(404).send({ status: false, msg: "user does not exists" });
         }
-        // if (userId !== req.loggedInUser) {
-        //     return res.status(403).send({ satus: false, message: `Unauthorized access! Owner info doesn't match` })
-        // }
+        if (userId !== req.loggedInUser) {
+            return res.status(403).send({ satus: false, message: `Unauthorized access! Owner info doesn't match` })
+        }
         if (!validate.isValidRequestBody(reqBody)) {
             return res.status(400).send({ status: false, msg: "enter data to add product to cart" });
         }
@@ -235,9 +235,9 @@ const getCartById = async function (req, res) {
         if (!checkuser) {
             return res.status(400).send({ status: false, message: " user does't exist" })
         }
-        // if (userId !== req.loggedInUser) {
-        //     return res.status(403).send({ satus: false, message: `Unauthorized access! Owner info doesn't match` })
-        // }
+        if (userId !== req.loggedInUser) {
+            return res.status(403).send({ satus: false, message: `Unauthorized access! Owner info doesn't match` })
+        }
         const getCart = await cartModel.findOne({ userId: userId })
         if (!getCart) {
             return res.status(400).send({ status: false, message: "User Id does't exist" })
@@ -262,9 +262,9 @@ const deletedCart = async function (req, res) {
         if (!checkuser) {
             return res.status(400).send({ status: false, message: " user does't exist" })
         }
-        // if (userId !== req.loggedInUser) {
-        //     return res.status(403).send({ satus: false, message: `Unauthorized access! Owner info doesn't match` })
-        // }
+        if (userId !== req.loggedInUser) {
+            return res.status(403).send({ satus: false, message: `Unauthorized access! Owner info doesn't match` })
+        }
 
         const checkCart = await cartModel.findOne({ userId: userId })
         if (!checkCart) {

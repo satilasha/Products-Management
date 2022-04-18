@@ -57,7 +57,12 @@ const createProduct = async function (req, res) {
                 return res.status(400).send({ status: false, message: "Please provide product's installments" })
             }
         }
-
+        if (Object.keys(reqBody).includes('isFreeShipping')) {
+            if (!(isFreeShipping == true || isFreeShipping == false)) {
+                return res.status(400).send({ status: false, message: 'isFreeShipping should be true or false' })
+            };
+            updatedProductData.isFreeShipping = isFreeShipping
+        }
 
         const newProductImage = await uploadFile(files[0])
 
@@ -227,7 +232,7 @@ const Productupdate = async function (req, res) {
         }
 
         if (Object.keys(reqBody).includes('isFreeShipping')) {
-            if (isFreeShipping != true || false) {
+            if (!(isFreeShipping == true || isFreeShipping == false)) {
                 return res.status(400).send({ status: false, message: 'isFreeShipping should be true or false' })
             };
             updatedProductData.isFreeShipping = isFreeShipping
