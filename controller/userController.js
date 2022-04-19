@@ -66,10 +66,10 @@ const createUser = async function (req, res) {
             return res.status(400).send({ status: false, message: "Please provide address" })
         }
         if (!validate.isValid(address.shipping)) {
-            return res.status(400).send({ status: false, message: "Please provide address" })
+            return res.status(400).send({ status: false, message: "Please provide shipping address" })
         }
         if (!validate.isValid(address.billing)) {
-            return res.status(400).send({ status: false, message: "Please provide address" })
+            return res.status(400).send({ status: false, message: "Please provide billing address" })
         }
 
         if (!validate.isValid(address.shipping.street)) {
