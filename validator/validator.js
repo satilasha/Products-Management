@@ -7,12 +7,12 @@ const isValid = (value) => {
     return true
 }
 
-const isValidString = (value) =>{
+const isValidString = (value) => {
     if (typeof value === 'undefined' || value === null) return false
     return /^[a-zA-Z\s]{0,255}$/.test(value)
 }
 const isValidNum = (value) => {
-
+    if (typeof value != 'number') return false
     if (typeof value === 'undefined' || value === null) return false
     return /^\d*\.?\d+$/.test(value)
 

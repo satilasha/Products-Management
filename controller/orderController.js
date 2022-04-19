@@ -14,7 +14,7 @@ const createOrder = async function (req, res) {
 
         const user_id = req.params.userId
 
-        const { userId, items, totalPrice, totalItems, totalQuantity } = reqbody
+        const { userId, items, totalPrice, totalItems, totalQuantity,status,cancellable } = reqbody
 
         if (!validate.isValidObjectId(user_id)) {
             return res.status(400).send({ status: false, message: "Valid userId is required" })
@@ -144,7 +144,7 @@ const updateOrder = async function (req, res) {
             return res.status(400).send({ status: false, message: "Please enter valid order Id" })
         }
 
-        const checkOrder = await orderModel.findOne({ _id: orderId })
+        const checkOrder = await orderModel.findOne({ _id: orderId , isDeleted : false})
         if (!checkOrder) {
             return res.status(400).send({ status: false, message: "Order Id not found" })
         }
@@ -156,12 +156,13 @@ const updateOrder = async function (req, res) {
             return res.status(400).send({ status: false, msg: `enter valid status` });
         }
 
-        if (checkOrder.cancellable != true && status == 'cancelled') {
+        if (checkOrder.cancellable == false && status == 'cancelled') {
             return res.status(400).send({ status: false, message: "Can't cancel the order" })
         }
-        if (status == 'completed') {
-            cancellable = false
+        if(checkOrder.status == 'completed' ){
+            return res.status(400).send({ status: false, message: "order is already completed" })
         }
+    
         if (checkOrder.userId != userId) {
             return res.status(400).send({ status: false, message: "User Id can't match with the order Id" })
         }
