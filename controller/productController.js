@@ -3,6 +3,9 @@ const validate = require('../validator/validator')
 const { uploadFile } = require('./awsController')
 
 
+ /*************************create product***********************************/
+
+
 const createProduct = async function (req, res) {
     try {
         const data = req.body
@@ -29,6 +32,9 @@ const createProduct = async function (req, res) {
             return res.status(400).send({ status: false, message: "Please provide product's description" })
         }
 
+        if (!validate.isValid(price)) {
+            return res.status(400).send({ status: false, message: "Please provide product's price" })
+        }
         if (!validate.isValidNum(price)) {
             return res.status(400).send({ status: false, message: "Please provide valid product's price" })
         }
@@ -46,8 +52,14 @@ const createProduct = async function (req, res) {
             if (!sizePresent)
                 return res.status(400).send({ status: false, message: "Please give proper sizes among XS S M X L XXL XL" })
         }
+        if (!validate.isValid(currencyId)) {
+            return res.status(400).send({ status: false, message: "Please provide product's currencyId" })
+        }
         if (!validate.isValidString(currencyId)) {
             return res.status(400).send({ status: false, message: "Please provide valid product's currencyId" })
+        }
+        if (!validate.isValid(currencyId)) {
+            return res.status(400).send({ status: false, message: "Please provide product's currencyId" })
         }
         if (!validate.isValidString(currencyFormat)) {
             return res.status(400).send({ status: false, message: "Please provide valid product's currencyFormat" })
@@ -57,7 +69,7 @@ const createProduct = async function (req, res) {
                 return res.status(400).send({ status: false, message: "Please provide product's installments" })
             }
         }
-        if (Object.keys(reqBody).includes('isFreeShipping')) {
+        if (Object.keys(data).includes('isFreeShipping')) {
             if (!(isFreeShipping == true || isFreeShipping == false)) {
                 return res.status(400).send({ status: false, message: 'isFreeShipping should be true or false' })
             };
@@ -70,13 +82,18 @@ const createProduct = async function (req, res) {
 
         const newProduct = await productModel.create(productData)
 
-        return res.status(201).send({ status: true, data: newProduct })
+        return res.status(201).send({ status: true, message: "New product create",data: newProduct })
 
     } catch (error) {
         console.log(error)
         return res.status(500).send({ Error: error.message })
     }
 }
+
+
+ /*************************get product***********************************/
+
+
 const getProduct = async (req, res) => {
     try {
         console.log(req.headers)
@@ -142,7 +159,7 @@ const getProduct = async (req, res) => {
             return res.status(400).send({ status: false, msg: "No product found" });
         }
 
-        res.status(200).send({ status: true, data: product });
+        res.status(200).send({ status: true, message:"successfull", data: product });
     } catch (error) {
         res.status(500).send({ status: false, msg: error.message });
     }
@@ -172,6 +189,8 @@ const getProductbyid = async function (req, res) {
     }
 }
 
+
+ /*************************update product***********************************/
 
 
 const Productupdate = async function (req, res) {

@@ -1,6 +1,9 @@
 const cartModel = require('../model/cartModel')
 const orderModel = require('../model/orderModel')
 const validate = require('../validator/validator')
+const userModel = require('../model/userModel')
+
+
 
 /*******create order************/
 
@@ -11,6 +14,7 @@ const createOrder = async function (req, res) {
 
         const user_id = req.params.userId
 
+        const { userId, items, totalPrice, totalItems, totalQuantity } = reqbody
 
         if (!validate.isValidObjectId(user_id)) {
             return res.status(400).send({ status: false, message: "Valid userId is required" })
@@ -21,8 +25,6 @@ const createOrder = async function (req, res) {
         if (!validate.isValidRequestBody(reqbody)) {
             return res.status(400).send({ status: false, message: "Please enter the order details" })
         }
-
-        const { userId, items, totalPrice, totalItems, totalQuantity } = reqbody
 
         if (!validate.isValid(userId)) {
             return res.status(400).send({ status: false, message: "Please enter user Id" })

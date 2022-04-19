@@ -3,10 +3,15 @@ const productModel = require('../model/productModel')
 const cartModel = require('../model/cartModel')
 const userModel = require('../model/userModel')
 
+
+ /*************************add product***********************************/
+
+
 const addProduct = async (req, res) => {
     try {
         let user_id = req.params.userId
         const data = req.body;
+        
         if (!validate.isValidObjectId(user_id)) {
             return res.status(400).send({ status: false, msg: "Invalid userId" });
         }
@@ -79,7 +84,7 @@ const addProduct = async (req, res) => {
                         { new: true }
                     )
 
-                    return res.status(201).send({ status: true, data: newProduct });
+                    return res.status(201).send({ status: true, nessage: "successful", data: newProduct });
                 }
             }
             // console.log(items[0])
@@ -88,7 +93,7 @@ const addProduct = async (req, res) => {
                 { userId: userId },
                 { $push: { items: items[0] }, $set: { totalPrice: totalPrice, totalItems: totalItems } },
                 { new: true });
-            return res.status(201).send({ status: true, data: newProduct });
+            return res.status(201).send({ status: true, message: "successfull", data: newProduct });
 
         }
         // console.log(items[0])
@@ -100,13 +105,17 @@ const addProduct = async (req, res) => {
         };
 
         cart = await cartModel.create(newProduct);
-        res.status(201).send({ status: true, data: cart });
+        res.status(201).send({ status: true, message: "successful", data: cart });
 
 
     } catch (error) {
         res.status(500).send({ status: false, message: error.message })
     }
 }
+
+
+ /*************************update product***********************************/
+
 
 const updateCart = async function (req, res) {
     try {
@@ -178,7 +187,7 @@ const updateCart = async function (req, res) {
                             { $pull: { items: { productId: productId } }, $set: { totalPrice: totalPrice, totalItems: totalItems } },
                             { new: true }
                         )
-                        return res.status(201).send({ status: true, data: newProduct });
+                        return res.status(201).send({ status: true, message: "successfull", data: newProduct });
                     }
 
                     const newProduct = await cartModel.findOneAndUpdate(
@@ -187,7 +196,7 @@ const updateCart = async function (req, res) {
                         { new: true }
                     )
 
-                    return res.status(201).send({ status: true, data: newProduct });
+                    return res.status(201).send({ status: true, message: "successfulld", data: newProduct });
                 } else {
                     return res.send({ status: false, msg: "product does not exists in cart" })
                 }
@@ -209,7 +218,7 @@ const updateCart = async function (req, res) {
                         { $pull: { items: { productId: productId }, $set: { totalPrice: totalPrice, totalItems: totalItems } } },
                         { new: true }
                     )
-                    return res.status(201).send({ status: true, data: newProduct });
+                    return res.status(201).send({ status: true, message: "successful", data: newProduct });
                 } else {
                     return res.send({ status: false, msg: "product does not exists in cart" })
                 }
@@ -222,6 +231,9 @@ const updateCart = async function (req, res) {
         return res.status(500).send({ status: false, msg: error.message })
     }
 }
+
+
+ /*************************get cart***********************************/
 
 
 const getCartById = async function (req, res) {
@@ -249,6 +261,9 @@ const getCartById = async function (req, res) {
         return res.status(500).send({ status: false, msg: error.message })
     }
 }
+
+
+ /*************************delete cart***********************************/
 
 
 const deletedCart = async function (req, res) {
