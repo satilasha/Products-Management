@@ -58,7 +58,7 @@ const addProduct = async (req, res) => {
             return res.status(404).send({ status: false, msg: "product not found" });
         }
 
-        if (!validate.isValidNum(quantity) ) {
+        if (!validate.isValidNumber(quantity) ) {
             return res.status(400).send({ status: false, msg: "enter a qunatity" });
         }
         if(quantity < 1){
@@ -84,7 +84,7 @@ const addProduct = async (req, res) => {
                         { new: true }
                     )
 
-                    return res.status(201).send({ status: true, nessage: "successful", data: newProduct });
+                    return res.status(200).send({ status: true, nessage: "successful", data: newProduct });
                 }
             }
             // console.log(items[0])
@@ -93,7 +93,7 @@ const addProduct = async (req, res) => {
                 { userId: userId },
                 { $push: { items: items[0] }, $set: { totalPrice: totalPrice, totalItems: totalItems } },
                 { new: true });
-            return res.status(201).send({ status: true, message: "successfull", data: newProduct });
+            return res.status(200).send({ status: true, message: "successfull", data: newProduct });
 
         }
         // console.log(items[0])

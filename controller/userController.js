@@ -2,7 +2,6 @@ const userModel = require('../model/userModel')
 const { uploadFile } = require('./awsController')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
-const { update } = require('../model/userModel')
 const validate = require('../validator/validator')
 
 /**********************create user*************************************/

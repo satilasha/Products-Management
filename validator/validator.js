@@ -12,12 +12,15 @@ const isValidString = (value) => {
     return /^[a-zA-Z\s]{0,255}$/.test(value)
 }
 const isValidNum = (value) => {
-    if (typeof value != 'number') return false
     if (typeof value === 'undefined' || value === null) return false
     return /^\d*\.?\d+$/.test(value)
-
-
 }
+const isValidNumber = (value) => {
+    if (typeof value !== 'number') return false
+    // if (typeof value === 'undefined' || value === null) return false
+  return true
+}
+
 const isValidRequestBody = (requestBody) => {
     if (Object.keys(requestBody).length > 0) {
         return true
@@ -53,6 +56,7 @@ const isValidStatus = (status) => {
 
 module.exports = {
     isValid,
+    isValidNumber,
     isValidRequestBody,
     isValidEmail,
     isValidPhone,

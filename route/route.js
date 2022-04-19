@@ -33,8 +33,8 @@ router.get('/users/:userId/cart', middleware.authentication,cartController.getCa
 router.delete('/users/:userId/cart', middleware.authentication,cartController.deletedCart)
 
 
-router.post('/users/:userId/orders', middleware.authentication, orderController.createOrder)
-router.put('/users/:userId/orders', middleware.authentication, orderController.updateOrder)
+router.post('/users/:userId/orders',  middleware.authentication,orderController.createOrder)
+router.put('/users/:userId/orders',  middleware.authentication,orderController.updateOrder)
 module.exports = router
 
 

@@ -19,9 +19,9 @@ const createOrder = async function (req, res) {
         if (!validate.isValidObjectId(user_id)) {
             return res.status(400).send({ status: false, message: "Valid userId is required" })
         }
-        if (userId !== req.loggedInUser) {
-            return res.status(403).send({ satus: false, message: `Unauthorized access! Owner info doesn't match` })
-        }
+        // if (userId !== req.loggedInUser) {
+        //     return res.status(403).send({ satus: false, message: `Unauthorized access! Owner info doesn't match` })
+        // }
         if (!validate.isValidRequestBody(reqbody)) {
             return res.status(400).send({ status: false, message: "Please enter the order details" })
         }
@@ -52,9 +52,12 @@ const createOrder = async function (req, res) {
             return res.status(400).send({ status: false, msg: "enter a valid productId" });
         }
 
-
-        if (!validate.isValidNum(quantity)) {
+        if (!validate.isValid(quantity)) {
             return res.status(400).send({ status: false, msg: "enter a qunatity" });
+        }
+
+        if (!validate.isValidNumber(quantity)) {
+            return res.status(400).send({ status: false, msg: "enter quantity in number" });
         }
         if (quantity < 1) {
             return res.status(400).send({ status: false, msg: "enter min qunatity 1" });
@@ -64,24 +67,24 @@ const createOrder = async function (req, res) {
             return res.status(400).send({ status: false, message: "Please enter total price" })
         }
 
-        if (!validate.isValidNum(totalPrice)) {
-            return res.status(400).send({ status: false, message: "Please enter valid total price" })
+        if (!validate.isValidNumber(totalPrice)) {
+            return res.status(400).send({ status: false, message: "enter total price in number" })
         }
 
         if (!validate.isValid(totalItems)) {
             return res.status(400).send({ status: false, message: "Please enter total items" })
         }
 
-        if (!validate.isValidNum(totalItems)) {
-            return res.status(400).send({ status: false, message: "Please enter valid total items" })
+        if (!validate.isValidNumber(totalItems)) {
+            return res.status(400).send({ status: false, message: "enter total items in number" })
         }
 
         if (!validate.isValid(totalQuantity)) {
             return res.status(400).send({ status: false, message: "Please enter total quantity" })
         }
 
-        if (!validate.isValidNum(totalQuantity)) {
-            return res.status(400).send({ status: false, message: "Please enter valid total quantity" })
+        if (!validate.isValidNumber(totalQuantity)) {
+            return res.status(400).send({ status: false, message: "enter total quantity in numbers" })
         }
 
         if (Object.keys(reqbody).includes('cancellable')) {
