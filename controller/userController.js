@@ -62,43 +62,49 @@ const createUser = async function (req, res) {
         if (!validate.isValidPassword(password)) {
             return res.status(400).send({ status: false, message: "Password should be of 8 to 15 characters" })
         }
-
-        if (address) {
-            if (address.shipping) {
-                if (!validate.isValid(address.shipping.street)) {
-                    return res.status(400).send({ status: false, message: "Please provide street name in shipping address" })
-                }
-
-                if (!validate.isValid(address.shipping.city)) {
-                    return res.status(400).send({ status: false, message: "Please provide city name in shipping address" })
-                }
-
-                if (!validate.isValid(address.shipping.pincode)) {
-                    return res.status(400).send({ status: false, message: "Please provide pincode in shipping address" })
-                }
-                if (!validate.isValidPincode(address.shipping.pincode)) {
-                    res.status(400).send({ status: false, message: `Pincode is not valid` })
-                    return
-                }
-            }
-            if (address.billing) {
-                if (!validate.isValid(address.billing.street)) {
-                    return res.status(400).send({ status: false, message: "Please provide street name in billing address" })
-                }
-
-                if (!validate.isValid(address.billing.city)) {
-                    return res.status(400).send({ status: false, message: "Please provide city name in billing address" })
-                }
-
-                if (!validate.isValid(address.billing.pincode)) {
-                    return res.status(400).send({ status: false, message: "Please provide pincode in billing address" })
-                }
-                if (!validate.isValidPincode(address.billing.pincode)) {
-                    res.status(400).send({ status: false, message: `Pincode is not valid` })
-                    return
-                }
-            }
+        if (!validate.isValid(address)) {
+            return res.status(400).send({ status: false, message: "Please provide address" })
         }
+        if (!validate.isValid(address.shipping)) {
+            return res.status(400).send({ status: false, message: "Please provide address" })
+        }
+        if (!validate.isValid(address.billing)) {
+            return res.status(400).send({ status: false, message: "Please provide address" })
+        }
+
+        if (!validate.isValid(address.shipping.street)) {
+            return res.status(400).send({ status: false, message: "Please provide street name in shipping address" })
+        }
+
+        if (!validate.isValid(address.shipping.city)) {
+            return res.status(400).send({ status: false, message: "Please provide city name in shipping address" })
+        }
+
+        if (!validate.isValid(address.shipping.pincode)) {
+            return res.status(400).send({ status: false, message: "Please provide pincode in shipping address" })
+        }
+        if (!validate.isValidPincode(address.shipping.pincode)) {
+            res.status(400).send({ status: false, message: `Pincode is not valid` })
+            return
+        }
+
+
+        if (!validate.isValid(address.billing.street)) {
+            return res.status(400).send({ status: false, message: "Please provide street name in billing address" })
+        }
+
+        if (!validate.isValid(address.billing.city)) {
+            return res.status(400).send({ status: false, message: "Please provide city name in billing address" })
+        }
+
+        if (!validate.isValid(address.billing.pincode)) {
+            return res.status(400).send({ status: false, message: "Please provide pincode in billing address" })
+        }
+        if (!validate.isValidPincode(address.billing.pincode)) {
+            res.status(400).send({ status: false, message: `Pincode is not valid` })
+            return
+        }
+
 
         /*************************upload image***********************************/
 
@@ -140,19 +146,21 @@ const createUser = async function (req, res) {
 const loginUser = async function (req, res) {
 
     try {
-   
+
         let email = req.body.email;
         let pass = req.body.password;
 
         if (!email || !pass)
-        return res.status(400).send({ status: false, message: "email or the password is not entered" });
+            return res.status(400).send({ status: false, message: "email or the password is not entered" });
 
         if (!validate.isValidEmail(email)) {
-        return res.status(400).send({ status: false, message: `Invalid email` }) }
-    
+            return res.status(400).send({ status: false, message: `Invalid email` })
+        }
+
         if (!validate.isValidPassword(pass)) {
-        return res.status(400).send({ status: false, message: "Password should be of 8 to 15 characters" })}
-    
+            return res.status(400).send({ status: false, message: "Password should be of 8 to 15 characters" })
+        }
+
         const user = await userModel.findOne({ email: email })
         if (!user) return res.status(400).send({ status: false, message: "Email is incorrect" })
 
@@ -160,7 +168,7 @@ const loginUser = async function (req, res) {
         const passMatch = await bcrypt.compare(pass, password)
         if (!passMatch) return res.status(400).send({ status: false, message: "Password is incorrect" })
 
-       
+
         /******************************create token***********************************/
 
         const token = jwt.sign({
@@ -224,7 +232,7 @@ let updateUser = async function (req, res) {
             return res.status(403).send({ satus: false, message: `Unauthorized access! Owner info doesn't match` })
         }
         let { fname, lname, email, phone, password, profileImage, address } = data
-        
+
         if (Object.keys(data).includes('fname')) {
             if (!validate.isValid(fname)) {
                 return res.status(400).send({ status: false, message: "Please give a proper fname" })
@@ -244,7 +252,7 @@ let updateUser = async function (req, res) {
             if (!validate.isValidEmail(email.trim())) {
                 res.status(400).send({ status: false, message: `Invalid email` })
                 return
-            }           
+            }
             const dupliEmail = await userModel.findOne({ email })
             if (dupliEmail) { return res.status(400).send({ status: false, message: "Email already exists" }) }
 
@@ -275,16 +283,16 @@ let updateUser = async function (req, res) {
             updateUserData.password = encyptedPassword
 
         }
-        if(files.length > 0){
-        if (Object.keys(files[0]).includes('fieldname')) {
-            if (files.length == 0) {
-                return res.status(400).send({ status: false, message: "Please provide a profile image" })
-            }
-             profileImage = await uploadFile(files[0])
+        if (files.length > 0) {
+            if (Object.keys(files[0]).includes('fieldname')) {
+                if (files.length == 0) {
+                    return res.status(400).send({ status: false, message: "Please provide a profile image" })
+                }
+                profileImage = await uploadFile(files[0])
 
-            updateUserData.profileImage = profileImage
+                updateUserData.profileImage = profileImage
+            }
         }
-    }
 
         if (Object.keys(data).includes("address")) {
             if (Object.keys(address).includes('shipping')) {
