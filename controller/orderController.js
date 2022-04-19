@@ -52,8 +52,12 @@ const createOrder = async function (req, res) {
             return res.status(400).send({ status: false, msg: "enter a valid productId" });
         }
 
-        if (!validate.isValidNum(quantity) && quantity < 1) {
-            return res.status(400).send({ status: false, msg: "enter a qunatity more than 1 " });
+
+        if (!validate.isValidNum(quantity)) {
+            return res.status(400).send({ status: false, msg: "enter a qunatity" });
+        }
+        if (quantity < 1) {
+            return res.status(400).send({ status: false, msg: "enter min qunatity 1" });
         }
 
         if (!validate.isValid(totalPrice)) {
@@ -78,6 +82,23 @@ const createOrder = async function (req, res) {
 
         if (!validate.isValidNum(totalQuantity)) {
             return res.status(400).send({ status: false, message: "Please enter valid total quantity" })
+        }
+
+        if (Object.keys(reqbody).includes('cancellable')) {
+            if (!(cancellable == true || cancellable == false)) {
+                return res.status(400).send({ status: false, message: 'cancellable should be true or false' })
+            };
+        }
+        if (Object.keys(reqbody).includes('status')) {
+            if (!validate.isValid(status)) {
+                return res.status(400).send({ status: false, msg: "enter the status" });
+            }
+            if (!validate.isValidStatus(status)) {
+                return res.status(400).send({ status: false, msg: `enter valid status` });
+            }
+            if ((status == 'completed' || status == 'cancelled')) {
+                return res.status(400).send({ status: false, message: 'order cannot be cancelled or completed at the time of creation' })
+            };
         }
 
         const crtOrder = await orderModel.create(reqbody)
@@ -127,7 +148,7 @@ const updateOrder = async function (req, res) {
         if (!checkOrder) {
             return res.status(400).send({ status: false, message: "Order Id not found" })
         }
-        
+
         if (!validate.isValid(status)) {
             return res.status(400).send({ status: false, msg: "enter the status" });
         }
@@ -138,7 +159,9 @@ const updateOrder = async function (req, res) {
         if (checkOrder.cancellable != true && status == 'cancelled') {
             return res.status(400).send({ status: false, message: "Can't cancel the order" })
         }
-
+        if (status == 'completed') {
+            cancellable = false
+        }
         if (checkOrder.userId != userId) {
             return res.status(400).send({ status: false, message: "User Id can't match with the order Id" })
         }
