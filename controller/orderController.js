@@ -173,14 +173,15 @@ const updateOrder = async function (req, res) {
 //             if (!(cancellable == true || cancellable == false)) {
 //                 return res.status(400).send({ status: false, message: 'cancellable should be true or false' })
 //             };
-//         }
-
+//        
+// if (Object.keys(data).includes('status')) {
 //         if (!validate.isValid(status)) {
 //             return res.status(400).send({ status: false, msg: "enter the status" });
 //         }
 //         if (!validate.isValidStatus(status)) {
 //             return res.status(400).send({ status: false, msg: `enter valid status` });
 //         }
+// }
 //         if (cancellable == false && status == 'cancelled') {
 //             return res.status(400).send({ status: false, msg: `order cannot be cancelled` });
 //         }
