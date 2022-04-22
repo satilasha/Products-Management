@@ -8,11 +8,6 @@ const authentication = (req, res, next) => {
             return res.status(400).send({ status: false, msg: "please enter token " })
         }
         const token = bearerToken.split(" ")[1]
-
-        // const token = req.headers["x-api-key"]
-        // if (!token) {
-        //     return res.status(400).send({ status: false, msg: "please enter token " })
-        // }
         let decodeToken = jwt.decode(token)
         if (!decodeToken) {
             return res.status(401).send({ status: false, msg: "Not a valid Token " })

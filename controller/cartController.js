@@ -4,14 +4,14 @@ const cartModel = require('../model/cartModel')
 const userModel = require('../model/userModel')
 
 
- /*************************add product***********************************/
+/*************************add product***********************************/
 
 
 const addProduct = async (req, res) => {
     try {
         let user_id = req.params.userId
         const data = req.body;
-        
+
         if (!validate.isValidObjectId(user_id)) {
             return res.status(400).send({ status: false, msg: "Invalid userId" });
         }
@@ -58,10 +58,10 @@ const addProduct = async (req, res) => {
             return res.status(404).send({ status: false, msg: "product not found" });
         }
 
-        if (!validate.isValidNumber(quantity) ) {
+        if (!validate.isValidNumber(quantity)) {
             return res.status(400).send({ status: false, msg: "enter a qunatity" });
         }
-        if(quantity < 1){
+        if (quantity < 1) {
             return res.status(400).send({ status: false, msg: "enter min qunatity 1" });
         }
 
@@ -72,7 +72,7 @@ const addProduct = async (req, res) => {
         const cartPresent = await cartModel.findOne({ userId: user_id });
         if (cartPresent) {
 
-          
+
             totalPrice = totalPrice + cartPresent.totalPrice;
 
             for (i = 0; i < cartPresent.items.length; i++) {
@@ -80,7 +80,7 @@ const addProduct = async (req, res) => {
                     // let ss = items[i]
                     const newProduct = await cartModel.findOneAndUpdate(
                         { userId: userId, items: { $elemMatch: { productId: items[0].productId } } },
-                        { $inc: { "items.$.quantity": 1 }, $set: { totalPrice: totalPrice} },
+                        { $inc: { "items.$.quantity": 1 }, $set: { totalPrice: totalPrice } },
                         { new: true }
                     )
 
@@ -88,7 +88,7 @@ const addProduct = async (req, res) => {
                 }
             }
             // console.log(items[0])
-              totalItems = cartPresent.totalItems + 1
+            totalItems = cartPresent.totalItems + 1
             const newProduct = await cartModel.findOneAndUpdate(
                 { userId: userId },
                 { $push: { items: items[0] }, $set: { totalPrice: totalPrice, totalItems: totalItems } },
@@ -114,7 +114,7 @@ const addProduct = async (req, res) => {
 }
 
 
- /*************************update product***********************************/
+/*************************update product***********************************/
 
 
 const updateCart = async function (req, res) {
@@ -198,7 +198,7 @@ const updateCart = async function (req, res) {
 
                     return res.status(201).send({ status: true, message: "successfulld", data: newProduct });
                 } else {
-                    return res.send({ status: false, msg: "product does not exists in cart" })
+                    return res.status(404).send({ status: false, msg: "product does not exists in cart" })
                 }
             }
 
@@ -209,18 +209,17 @@ const updateCart = async function (req, res) {
 
                 if (cartPresent.items[i].productId == productId) {
                     let totalPrice = cartPresent.items[i].quantity * product.price;
-                    let totalItems =cartPresent.totalItems -1
-                    // let totalItems = parseInt(cartPresent.totalItems) - parseInt(cartPresent.items[i].quantity)
+                    let totalItems = cartPresent.totalItems - 1
                     totalPrice = cartPresent.totalPrice - totalPrice
 
                     const newProduct = await cartModel.findOneAndUpdate(
                         { userId: userId, items: { $elemMatch: { productId: productId } } },
-                        { $pull: { items: { productId: productId }, $set: { totalPrice: totalPrice, totalItems: totalItems } } },
+                        { $pull: { items: { productId: productId }}, $set: { totalPrice: totalPrice, totalItems: totalItems } },
                         { new: true }
                     )
                     return res.status(201).send({ status: true, message: "successful", data: newProduct });
                 } else {
-                    return res.send({ status: false, msg: "product does not exists in cart" })
+                    return res.status(404).send({ status: false, msg: "product does not exists in cart" })
                 }
 
             }
@@ -233,7 +232,7 @@ const updateCart = async function (req, res) {
 }
 
 
- /*************************get cart***********************************/
+/*************************get cart***********************************/
 
 
 const getCartById = async function (req, res) {
@@ -263,7 +262,7 @@ const getCartById = async function (req, res) {
 }
 
 
- /*************************delete cart***********************************/
+/*************************delete cart***********************************/
 
 
 const deletedCart = async function (req, res) {

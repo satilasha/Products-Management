@@ -3,7 +3,7 @@ const validate = require('../validator/validator')
 const { uploadFile } = require('./awsController')
 
 
- /*************************create product***********************************/
+/*************************create product***********************************/
 
 
 const createProduct = async function (req, res) {
@@ -47,22 +47,26 @@ const createProduct = async function (req, res) {
             return res.status(400).send({ status: false, message: "please provide the product size" })
         }
         let sizeKeys = ["S", "XS", "M", "X", "L", "XXL", "XL"]
-        for (let i = 0; i < availableSizes.length; i++) {
-            let sizePresent = sizeKeys.includes(availableSizes[i])
+        let sizes = availableSizes.split(' ')
+        for (let i = 0; i < sizes.length; i++) {
+            let sizePresent = sizeKeys.includes(sizes[i])
             if (!sizePresent)
                 return res.status(400).send({ status: false, message: "Please give proper sizes among XS S M X L XXL XL" })
         }
         if (!validate.isValid(currencyId)) {
             return res.status(400).send({ status: false, message: "Please provide product's currencyId" })
         }
-        if (!validate.isValidString(currencyId)) {
+        if (!validate.isValidCurrencyId(currencyId)) {
             return res.status(400).send({ status: false, message: "Please provide valid product's currencyId" })
         }
-        if (!validate.isValid(currencyId)) {
+        if (!validate.isValid(currencyFormat)) {
             return res.status(400).send({ status: false, message: "Please provide product's currencyId" })
         }
-        if (!validate.isValidString(currencyFormat)) {
-            return res.status(400).send({ status: false, message: "Please provide valid product's currencyFormat" })
+        if (currencyId == 'INR' && currencyFormat != '₹') {
+            return res.status(400).send({ status: false, message: "The currency symbol is not as per the currency format. Supported " })
+        }
+        if (currencyId == 'USD' && currencyFormat != '$') {
+            return res.status(400).send({ status: false, message: "The currency symbol is not as per the currency format. Supported " })
         }
         if (Object.keys(data).includes('installments')) {
             if (!validate.isValidNum(installments)) {
@@ -82,7 +86,7 @@ const createProduct = async function (req, res) {
 
         const newProduct = await productModel.create(productData)
 
-        return res.status(201).send({ status: true, message: "New product create",data: newProduct })
+        return res.status(201).send({ status: true, message: "New product create", data: newProduct })
 
     } catch (error) {
         console.log(error)
@@ -91,7 +95,7 @@ const createProduct = async function (req, res) {
 }
 
 
- /*************************get product***********************************/
+/*************************get product***********************************/
 
 
 const getProduct = async (req, res) => {
@@ -108,10 +112,8 @@ const getProduct = async (req, res) => {
                 filterQuery.title = { $regex: `.*${name.trim()}.*` };
             }
             if (Object.keys(filter).includes('priceSort')) {
-                if (priceSort == "ascending") {
-                    Sort = 1;
-                }
-                if (priceSort == "decending") Sort = -1;
+                if (priceSort == 1) Sort = 1;
+                if (priceSort == -1) Sort = -1;
                 else {
                     return res.status(400).send({ status: false, message: "Please give ascending or decending price sort" })
                 }
@@ -125,7 +127,7 @@ const getProduct = async (req, res) => {
                     if (!sizePresent)
                         return res.status(400).send({ status: false, message: "Please give proper sizes among XS S M X L XXL XL" })
                 }
-                let allSize = size.trim().split(' ')  
+                let allSize = size.trim().split(' ')
                 console.log(allSize)
                 filterQuery.availableSizes = { $in: allSize }
             }
@@ -142,14 +144,14 @@ const getProduct = async (req, res) => {
                 }
                 filterQuery.price = { $lte: priceLessThan };
             }
-            if(filter.hasOwnProperty("priceLessThan",'priceGreaterThan')){
+            if (filter.hasOwnProperty("priceLessThan", 'priceGreaterThan')) {
                 if (!validate.isValidNum(priceLessThan)) {
                     return res.status(400).send({ status: false, msg: "Please give valid price" })
                 }
                 if (!validate.isValidNum(priceGreaterThan)) {
                     return res.status(400).send({ status: false, msg: "Please give valid price" })
                 }
-                filterQuery.price = { $lte: priceLessThan, $gte: priceGreaterThan};
+                filterQuery.price = { $lte: priceLessThan, $gte: priceGreaterThan };
             }
         }
         // console.log(filterQuery)
@@ -159,7 +161,7 @@ const getProduct = async (req, res) => {
             return res.status(400).send({ status: false, msg: "No product found" });
         }
 
-        res.status(200).send({ status: true, message:"successfull", data: product });
+        res.status(200).send({ status: true, message: "successfull", data: product });
     } catch (error) {
         res.status(500).send({ status: false, msg: error.message });
     }
@@ -190,7 +192,7 @@ const getProductbyid = async function (req, res) {
 }
 
 
- /*************************update product***********************************/
+/*************************update product***********************************/
 
 
 const Productupdate = async function (req, res) {
@@ -267,8 +269,9 @@ const Productupdate = async function (req, res) {
                 return res.status(400).send({ status: false, message: 'style is not valid' })
             }
             let sizeKeys = ["S", "XS", "M", "X", "L", "XXL", "XL"]
-            for (let i = 0; i < availableSizes.length; i++) {
-                let sizePresent = sizeKeys.includes(availableSizes[i])
+            let sizes = availableSizes.split(' ')
+            for (let i = 0; i < sizes.length; i++) {
+                let sizePresent = sizeKeys.includes(sizes[i])
                 if (!sizePresent)
                     return res.status(400).send({ status: false, message: "Please give proper sizes among XS S M X L XXL XL" })
             }

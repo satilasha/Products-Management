@@ -196,6 +196,9 @@ const getProfile = async function (req, res) {
         if (!validate.isValidObjectId(userId)) {
             return res.status(400).send({ status: false, message: "Please enter a valid user Id" })
         }
+        if (userId !== req.loggedInUser) {
+            return res.status(403).send({ satus: false, message: `Unauthorized access! Owner info doesn't match` })
+        }
 
         const getProfileData = await userModel.findOne({ _id: userId })
         if (!getProfileData) {

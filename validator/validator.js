@@ -3,7 +3,6 @@ const ObjectId = require('mongoose').Types.ObjectId
 const isValid = (value) => {
     if (typeof value === 'string' && value.trim().length === 0) return false
     if (typeof value === 'undefined' || value === null) return false
-    // if (typeof value !== 'string') return false
     return true
 }
 
@@ -17,7 +16,6 @@ const isValidNum = (value) => {
 }
 const isValidNumber = (value) => {
     if (typeof value !== 'number') return false
-    // if (typeof value === 'undefined' || value === null) return false
   return true
 }
 
@@ -53,6 +51,11 @@ const isValidPincode = (pincode) => {
 const isValidStatus = (status) => {
     return ['pending', 'completed', 'cancelled'].indexOf(status) !== -1
 }
+const isValidCurrencyId = (Id) => {
+    if(Id == 'INR') return true
+    if(Id == 'USD') return true
+}
+
 
 module.exports = {
     isValid,
@@ -65,6 +68,7 @@ module.exports = {
     isValidPincode,
     isValidNum,
     isValidString,
-    isValidStatus
+    isValidStatus,
+    isValidCurrencyId
 
 }
