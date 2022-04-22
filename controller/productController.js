@@ -18,7 +18,7 @@ const createProduct = async function (req, res) {
             return res.status(400).send({ status: fale, message: "Please provide product's image" })
         }
 
-        const { title, description, price, style, availableSizes, installments, currencyId, currencyFormat } = data
+        const { title, description, price, style, availableSizes, installments, currencyId, currencyFormat, isFreeShipping } = data
 
         if (!validate.isValid(title)) {
             return res.status(400).send({ status: false, message: "Please provide product's title" })
