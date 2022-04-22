@@ -77,12 +77,11 @@ const createProduct = async function (req, res) {
             if (!(isFreeShipping == true || isFreeShipping == false)) {
                 return res.status(400).send({ status: false, message: 'isFreeShipping should be true or false' })
             };
-            updatedProductData.isFreeShipping = isFreeShipping
         }
 
         const newProductImage = await uploadFile(files[0])
 
-        const productData = { title, description, price, productImage: newProductImage, style, availableSizes, installments, currencyId, currencyFormat }
+        const productData = { title, description, price, productImage: newProductImage, style, availableSizes, installments, currencyId, currencyFormat, isFreeShipping }
 
         const newProduct = await productModel.create(productData)
 
@@ -144,7 +143,8 @@ const getProduct = async (req, res) => {
                 }
                 filterQuery.price = { $lte: priceLessThan };
             }
-            if (filter.hasOwnProperty("priceLessThan", 'priceGreaterThan')) {
+            if (filter.hasOwnProperty("priceLessThan")) {
+                if (filter.hasOwnProperty('priceGreaterThan')) {
                 if (!validate.isValidNum(priceLessThan)) {
                     return res.status(400).send({ status: false, msg: "Please give valid price" })
                 }
@@ -153,6 +153,7 @@ const getProduct = async (req, res) => {
                 }
                 filterQuery.price = { $lte: priceLessThan, $gte: priceGreaterThan };
             }
+        }
         }
         // console.log(filterQuery)
 
