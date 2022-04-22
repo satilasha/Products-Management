@@ -61,7 +61,7 @@ const addProduct = async (req, res) => {
         if (!validate.isValidNumber(quantity)) {
             return res.status(400).send({ status: false, msg: "enter a qunatity" });
         }
-        if (quantity < 1) {
+        if (quantity <= 1) {
             return res.status(400).send({ status: false, msg: "enter min qunatity 1" });
         }
 
